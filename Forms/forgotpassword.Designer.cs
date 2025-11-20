@@ -47,7 +47,7 @@
             llbBackToLogin.AutoSize = true;
             llbBackToLogin.Font = new Font("Segoe UI", 9F);
             llbBackToLogin.LinkColor = Color.RoyalBlue;
-            llbBackToLogin.Location = new Point(110, 270);
+            llbBackToLogin.Location = new Point(124, 284);
             llbBackToLogin.Name = "llbBackToLogin";
             llbBackToLogin.Size = new Size(138, 20);
             llbBackToLogin.TabIndex = 3;
@@ -63,9 +63,9 @@
             btnSend.FlatStyle = FlatStyle.Flat;
             btnSend.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnSend.ForeColor = Color.White;
-            btnSend.Location = new Point(41, 208);
+            btnSend.Location = new Point(46, 218);
             btnSend.Name = "btnSend";
-            btnSend.Size = new Size(267, 37);
+            btnSend.Size = new Size(300, 39);
             btnSend.TabIndex = 2;
             btnSend.Text = "GỬI MÃ";
             btnSend.UseVisualStyleBackColor = false;
@@ -74,9 +74,9 @@
             // panelLine1
             // 
             panelLine1.BackColor = Color.DarkGray;
-            panelLine1.Location = new Point(30, 150);
+            panelLine1.Location = new Point(34, 158);
             panelLine1.Name = "panelLine1";
-            panelLine1.Size = new Size(300, 1);
+            panelLine1.Size = new Size(338, 1);
             panelLine1.TabIndex = 4;
             // 
             // txtEmail
@@ -84,9 +84,9 @@
             txtEmail.BorderStyle = BorderStyle.None;
             txtEmail.Font = new Font("Segoe UI", 11F);
             txtEmail.ForeColor = Color.FromArgb(64, 64, 64);
-            txtEmail.Location = new Point(65, 122);
+            txtEmail.Location = new Point(73, 128);
             txtEmail.Name = "txtEmail";
-            txtEmail.Size = new Size(260, 25);
+            txtEmail.Size = new Size(292, 25);
             txtEmail.TabIndex = 1;
             txtEmail.Text = "Nhập email đăng ký...";
             // 
@@ -94,9 +94,9 @@
             // 
             picEmail.BackColor = Color.Transparent;
             picEmail.Image = Properties.Resources.email;
-            picEmail.Location = new Point(30, 120);
+            picEmail.Location = new Point(34, 126);
             picEmail.Name = "picEmail";
-            picEmail.Size = new Size(25, 25);
+            picEmail.Size = new Size(28, 26);
             picEmail.SizeMode = PictureBoxSizeMode.StretchImage;
             picEmail.TabIndex = 5;
             picEmail.TabStop = false;
@@ -106,7 +106,7 @@
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
             lblTitle.ForeColor = Color.RoyalBlue;
-            lblTitle.Location = new Point(60, 40);
+            lblTitle.Location = new Point(68, 42);
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new Size(237, 41);
             lblTitle.TabIndex = 0;
@@ -115,12 +115,13 @@
             // pictureBox1
             // 
             pictureBox1.Image = Properties.Resources.snapedit_1763483114039;
-            pictureBox1.Location = new Point(-9, -63);
+            pictureBox1.Location = new Point(-10, -66);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(1251, 674);
+            pictureBox1.Size = new Size(1407, 708);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox1.TabIndex = 2;
             pictureBox1.TabStop = false;
+            pictureBox1.Click += pictureBox1_Click;
             // 
             // lblClose
             // 
@@ -130,7 +131,7 @@
             lblClose.Cursor = Cursors.Hand;
             lblClose.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold);
             lblClose.ForeColor = Color.White;
-            lblClose.Location = new Point(966, 9);
+            lblClose.Location = new Point(1087, 9);
             lblClose.Name = "lblClose";
             lblClose.Size = new Size(31, 29);
             lblClose.TabIndex = 5;
@@ -139,9 +140,9 @@
             // 
             // forgotpassword
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(9F, 21F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1009, 551);
+            ClientSize = new Size(1135, 579);
             Controls.Add(lblClose);
             Controls.Add(pnlContainer);
             Controls.Add(pictureBox1);

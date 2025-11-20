@@ -116,5 +116,10 @@ namespace Do_an.Forms
             path.CloseFigure();
             c.Region = new Region(path);
         }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
