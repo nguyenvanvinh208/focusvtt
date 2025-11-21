@@ -95,7 +95,8 @@ namespace Do_an.Firebase
                     Uid = auth.User.Uid,
                     Username = username,
                     Email = email,
-                    CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                    CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    IsOnline = false
                 };
 
                 await _dbClient
