@@ -1,16 +1,15 @@
-﻿using Do_an.Firebase;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
+using System.IO;
+using System.Threading.Tasks;
+using Do_an.Models;
+using Do_an.Firebase;
+using Do_an.Services; // Đảm bảo bạn đã có class StunHelper trong namespace này
+using System.Net;
+using System.Net.Sockets;
+using System.Net.NetworkInformation;
 
 namespace Do_an.Forms
 {
@@ -42,6 +41,7 @@ namespace Do_an.Forms
         private readonly Color clrControlIcon = Color.FromArgb(60, 40, 20); // Icon màu nâu đen
         private readonly Color clrBackground = Color.FromArgb(253, 248, 235); // Nền kem giấy
         // -------------------------------------
+
         public MainDashboard(User user)
         {
             InitializeComponent();
@@ -65,6 +65,7 @@ namespace Do_an.Forms
             // Bắt đầu cập nhật dữ liệu và tìm IP cho tính năng Gọi điện
             _ = RefreshDataFromServer();
         }
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -84,6 +85,7 @@ namespace Do_an.Forms
             pnlSidebar.MouseMove += PnlContent_MouseMove;
             pnlSidebar.MouseUp += PnlContent_MouseUp;
         }
+
         #region Navigation & UserControls
         private void LoadHome()
         {
@@ -106,6 +108,7 @@ namespace Do_an.Forms
             };
             pnlContent.Controls.Add(_ucHome);
         }
+
         private void LoadSchedule()
         {
             pnlContent.Controls.Clear();
@@ -146,6 +149,7 @@ namespace Do_an.Forms
             pnlContent.Controls.Add(_ucMessage);
             pnlSidebar.Visible = false;
         }
+
         // Sự kiện Click Menu Sidebar
         private void btnHome_Click(object sender, EventArgs e) { LoadHome(); pnlSidebar.Visible = false; }
         private void btnSchedule_Click(object sender, EventArgs e) { LoadSchedule(); }
@@ -154,6 +158,8 @@ namespace Do_an.Forms
         private void BtnCloseMenu_Click(object sender, EventArgs e) => pnlSidebar.Visible = false;
 
         public void OpenMenu() { pnlSidebar.BringToFront(); pnlSidebar.Visible = true; }
+        #endregion
+
         #region Logic Server & Calling Support (IP Detection)
         private async Task RefreshDataFromServer()
         {
@@ -316,5 +322,95 @@ namespace Do_an.Forms
                 btn.ForeColor = clrTextInactive;
             };
         }
+
+        private void SetRoundedRegion(Control c, int radius) { using (GraphicsPath p = GetRoundedPath(new Rectangle(0, 0, c.Width, c.Height), radius)) c.Region = new Region(p); }
+        private GraphicsPath GetRoundedPath(Rectangle r, int d) { GraphicsPath p = new GraphicsPath(); d *= 2; p.AddArc(r.X, r.Y, d, d, 180, 90); p.AddArc(r.Right - d, r.Y, d, d, 270, 90); p.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90); p.AddArc(r.X, r.Bottom - d, d, d, 90, 90); p.CloseFigure(); return p; }
+        private void SetupAvatarUI() { picAvatar.SizeMode = PictureBoxSizeMode.StretchImage; GraphicsPath gp = new GraphicsPath(); gp.AddEllipse(0, 0, picAvatar.Width, picAvatar.Height); picAvatar.Region = new Region(gp); }
+
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+            CustomizeSidebar();
+            if (pnlControlBar != null) pnlControlBar.Location = new Point(ClientSize.Width - 130, 5);
+        }
+        #endregion
+
+        #region User Data & Avatar Handling
+        private void LoadUserData()
+        {
+            if (_currentUser != null)
+            {
+                lblUsername.Text = _currentUser.Username ?? "User";
+                string path = Path.Combine(_avatarFolder, $"{_currentUser.Uid}.jpg");
+                if (File.Exists(path)) try { using (var s = new FileStream(path, FileMode.Open, FileAccess.Read)) picAvatar.Image = Image.FromStream(s); } catch { LoadDefaultAvatar(); }
+                else LoadDefaultAvatar();
+            }
+        }
+        private void LoadDefaultAvatar() { try { using (MemoryStream ms = new MemoryStream(Properties.Resources.profile)) picAvatar.Image = Image.FromStream(ms); } catch { picAvatar.BackColor = Color.Peru; } }
+
+        private async void BtnChooseImage_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog o = new OpenFileDialog();
+            o.Filter = "Image|*.jpg;*.png;*.jpeg";
+            if (o.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    byte[] imageBytes;
+                    using (Image img = Image.FromFile(o.FileName))
+                    {
+                        using (Bitmap b = new Bitmap(img, new Size(200, 200))) // Resize 200x200
+                        {
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                b.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                                imageBytes = ms.ToArray();
+                            }
+                        }
+                    }
+                    string base64 = Convert.ToBase64String(imageBytes);
+                    await _dbService.UpdateUserAvatarAsync(_currentUser.Uid, base64);
+                    string dest = Path.Combine(_avatarFolder, $"{_currentUser.Uid}.jpg");
+                    File.WriteAllBytes(dest, imageBytes);
+                    using (MemoryStream ms = new MemoryStream(imageBytes)) picAvatar.Image = Image.FromStream(ms);
+                    MessageBox.Show("Đã cập nhật Avatar thành công!");
+                }
+                catch (Exception ex) { MessageBox.Show("Lỗi: " + ex.Message); }
+            }
+        }
+
+        private void PicAvatar_Click(object sender, EventArgs e)
+        {
+            ContextMenuStrip m = new ContextMenuStrip();
+            m.Items.Add("Đổi Avatar", null, BtnChooseImage_Click);
+            m.Items.Add("Thông tin cá nhân", null, (s, ev) => { using (Form f = new FormProfile(_currentUser)) f.ShowDialog(); });
+            m.Items.Add("Lịch sử điểm", null, (s, ev) => { using (Form f = new FormScoreHistory(_currentUser)) f.ShowDialog(); });
+            m.Items.Add(new ToolStripSeparator());
+            m.Items.Add("Đăng xuất", null, BtnLogout_Click);
+            m.Show(Cursor.Position);
+        }
+
+        private async void BtnLogout_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Đăng xuất?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                Properties.Settings.Default.IsLoggedIn = false;
+                Properties.Settings.Default.Save();
+                if (!string.IsNullOrEmpty(_currentUser.Uid)) await _authService.LogoutAsync(_currentUser.Uid);
+                Hide();
+                new Login().Show();
+            }
+        }
+        #endregion
+
+        #region Window Controls
+        private void StartClock() { _clockTimer = new System.Windows.Forms.Timer { Interval = 1000 }; _clockTimer.Tick += (s, e) => { if (!this.Text.Contains("My IP")) this.Text = $"FOCUS VTT - {DateTime.Now:HH:mm:ss}"; }; _clockTimer.Start(); }
+        private void BtnCloseApp_Click(object sender, EventArgs e) => Application.Exit();
+        private void BtnMaximizeApp_Click(object sender, EventArgs e) { if (WindowState == FormWindowState.Normal) WindowState = FormWindowState.Maximized; else WindowState = FormWindowState.Normal; btnMax.Invalidate(); }
+        private void BtnMinimizeApp_Click(object sender, EventArgs e) => WindowState = FormWindowState.Minimized;
+        private void PnlContent_MouseDown(object sender, MouseEventArgs e) { if (e.Button == MouseButtons.Left) { dragStartPoint = new Point(e.X, e.Y); isDragging = true; } }
+        private void PnlContent_MouseMove(object sender, MouseEventArgs e) { if (isDragging) { Point p1 = new Point(e.X, e.Y); Point p2 = PointToScreen(p1); Location = new Point(p2.X - dragStartPoint.X, p2.Y - dragStartPoint.Y); } }
+        private void PnlContent_MouseUp(object sender, MouseEventArgs e) => isDragging = false;
+        #endregion
     }
 }
