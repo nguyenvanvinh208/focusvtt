@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -142,6 +144,99 @@ namespace Do_an.Forms
             }
             pnlContent.Controls.Add(_ucMessage);
             pnlSidebar.Visible = false;
+        }
+        // Sự kiện Click Menu Sidebar
+        private void btnHome_Click(object sender, EventArgs e) { LoadHome(); pnlSidebar.Visible = false; }
+        private void btnSchedule_Click(object sender, EventArgs e) { LoadSchedule(); }
+        private void btnRanking_Click(object sender, EventArgs e) { LoadRanking(); }
+        private void btnChat_Click(object sender, EventArgs e) { LoadChat(); }
+        private void BtnCloseMenu_Click(object sender, EventArgs e) => pnlSidebar.Visible = false;
+
+        public void OpenMenu() { pnlSidebar.BringToFront(); pnlSidebar.Visible = true; }
+        #region Logic Server & Calling Support (IP Detection)
+        private async Task RefreshDataFromServer()
+        {
+            try
+            {
+                // 1. Cập nhật thông tin User từ Firebase
+                var latestUser = await _dbService.GetUserAsync(_currentUser.Uid);
+                if (latestUser != null)
+                {
+                    _currentUser.Username = latestUser.Username;
+                    _currentUser.Info = latestUser.Info ?? new UserProfile();
+
+                    // Lưu avatar mới nếu có
+                    if (!string.IsNullOrEmpty(latestUser.AvatarBase64))
+                    {
+                        string path = Path.Combine(_avatarFolder, $"{_currentUser.Uid}.jpg");
+                        try { File.WriteAllBytes(path, Convert.FromBase64String(latestUser.AvatarBase64)); } catch { }
+                    }
+
+                    this.Invoke((MethodInvoker)delegate {
+                        lblUsername.Text = _currentUser.Username;
+                        LoadUserData();
+                    });
+                }
+
+                // 2. LOGIC TÌM IP (QUAN TRỌNG CHO GỌI ĐIỆN)
+                // Sử dụng STUN để tìm Public IP, fallback về LAN IP nếu không có mạng
+                string finalIP = "";
+
+                // Bước 2a: Thử lấy Public IP qua STUN (Port 11000)
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        var ep = Do_an.Services.StunHelper.QueryPublicEndPoint(11000);
+                        if (ep != null) finalIP = $"{ep.Address}:{ep.Port}";
+                    }
+                    catch { }
+                });
+
+                // Bước 2b: Nếu không lấy được Public IP, tìm LAN IP
+                if (string.IsNullOrEmpty(finalIP))
+                {
+                    foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+                    {
+                        if (ni.OperationalStatus != OperationalStatus.Up) continue;
+                        if (ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
+
+                        foreach (var ip in ni.GetIPProperties().UnicastAddresses)
+                        {
+                            if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                            {
+                                string s = ip.Address.ToString();
+                                // Bỏ qua IP rác hoặc localhost
+                                if (s.StartsWith("169.254") || s.StartsWith("127.")) continue;
+
+                                // Ưu tiên IP Radmin/VPN (26.) hoặc IP LAN (192.168.)
+                                if (s.StartsWith("26.") || s.StartsWith("10."))
+                                {
+                                    finalIP = s + ":11000";
+                                    goto FoundIP;
+                                }
+                                if (s.StartsWith("192.168."))
+                                    finalIP = s + ":11000";
+                            }
+                        }
+                    }
+                }
+
+            FoundIP:;
+                if (string.IsNullOrEmpty(finalIP)) finalIP = "127.0.0.1:11000";
+
+                // 3. Cập nhật UI và Database
+                this.Invoke((MethodInvoker)delegate {
+                    this.Text = $"FOCUS VTT - My IP: {finalIP}";
+                });
+
+                // Cập nhật vào biến cục bộ (để truyền cho Video Call nếu cần)
+                _currentUser.LocalIP = finalIP;
+
+                // Đẩy IP lên Firebase để người khác gọi được mình
+                await _dbService.UpdateUserLocalIPAsync(_currentUser.Uid, finalIP);
+            }
+            catch { }
         }
     }
 }
