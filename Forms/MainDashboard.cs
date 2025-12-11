@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -237,6 +238,83 @@ namespace Do_an.Forms
                 await _dbService.UpdateUserLocalIPAsync(_currentUser.Uid, finalIP);
             }
             catch { }
+        }
+        #endregion
+
+        #region UI Customization (Vintage Theme)
+        private void AddControlBar()
+        {
+            pnlControlBar = new Panel() { BackColor = Color.Transparent, Size = new Size(120, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+
+            // Nút điều khiển màu Vintage
+            btnClose = CreateControlButton(DrawCloseIcon, BtnCloseApp_Click, Color.IndianRed);
+            btnMax = CreateControlButton(DrawMaximizeIcon, BtnMaximizeApp_Click, Color.BurlyWood);
+            btnMin = CreateControlButton(DrawMinimizeIcon, BtnMinimizeApp_Click, Color.BurlyWood);
+
+            btnClose.Location = new Point(80, 0);
+            btnMax.Location = new Point(40, 0);
+            btnMin.Location = new Point(0, 0);
+
+            pnlControlBar.Controls.AddRange(new Control[] { btnClose, btnMax, btnMin });
+            this.Controls.Add(pnlControlBar);
+            pnlControlBar.BringToFront();
+        }
+
+        public delegate void DrawIconDelegate(Graphics g, Rectangle rect, Color foreColor);
+
+        private PictureBox CreateControlButton(DrawIconDelegate drawFunc, EventHandler clickHandler, Color hoverColor)
+        {
+            PictureBox btn = new PictureBox() { Size = new Size(30, 30), SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.Transparent, Cursor = Cursors.Hand, Tag = drawFunc };
+            btn.Paint += (s, e) => {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                // Vẽ icon màu Nâu đen thay vì trắng để hợp nền kem
+                ((DrawIconDelegate)btn.Tag)(e.Graphics, e.ClipRectangle, clrControlIcon);
+            };
+            btn.MouseEnter += (s, e) => { btn.BackColor = hoverColor; btn.Invalidate(); };
+            btn.MouseLeave += (s, e) => { btn.BackColor = Color.Transparent; btn.Invalidate(); };
+            btn.Click += clickHandler;
+            return btn;
+        }
+
+        // Các hàm vẽ icon cửa sổ
+        private void DrawCloseIcon(Graphics g, Rectangle r, Color c) { using (Pen p = new Pen(c, 2)) { g.DrawLine(p, r.X + 8, r.Y + 8, r.Right - 8, r.Bottom - 8); g.DrawLine(p, r.Right - 8, r.Y + 8, r.X + 8, r.Bottom - 8); } }
+        private void DrawMaximizeIcon(Graphics g, Rectangle r, Color c) { using (Pen p = new Pen(c, 2)) { g.DrawRectangle(p, r.X + 8, r.Y + 8, r.Width - 16, r.Height - 16); } }
+        private void DrawMinimizeIcon(Graphics g, Rectangle r, Color c) { using (Pen p = new Pen(c, 2)) { g.DrawLine(p, r.X + 12, r.Bottom - 12, r.Right - 12, r.Bottom - 12); } }
+
+        private void CustomizeSidebar()
+        {
+            pnlSidebar.Dock = DockStyle.None;
+            pnlSidebar.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            pnlSidebar.BackColor = clrSidebarBg; // Màu gỗ tối
+            pnlSidebar.Size = new Size(280, this.ClientSize.Height - 100);
+            pnlSidebar.Location = new Point(30, 50);
+            SetRoundedRegion(pnlSidebar, 30);
+
+            // Style lại các nút trong sidebar
+            StyleButton(btnHome);
+            StyleButton(btnSchedule);
+            StyleButton(btnRanking);
+            StyleButton(btnChat);
+        }
+
+        private void StyleButton(Button btn)
+        {
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.BackColor = Color.Transparent;
+            btn.ForeColor = clrTextInactive; // Màu kem vàng
+            btn.Font = new Font("Segoe UI", 11);
+            btn.TextAlign = ContentAlignment.MiddleLeft;
+            btn.Padding = new Padding(20, 0, 0, 0);
+            btn.Cursor = Cursors.Hand;
+            btn.MouseEnter += (s, e) => {
+                btn.BackColor = clrHoverBtn; // Hover màu gỗ sáng
+                btn.ForeColor = clrTextActive; // Chữ trắng
+            };
+            btn.MouseLeave += (s, e) => {
+                btn.BackColor = Color.Transparent;
+                btn.ForeColor = clrTextInactive;
+            };
         }
     }
 }
