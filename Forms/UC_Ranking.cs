@@ -485,5 +485,30 @@ namespace Do_an.Forms
             }
         }
         //------------------------------------------------------------------
+
+        private void DrawList()
+        {
+            flpLeaderboard.Controls.Clear();
+            for (int i = 3; i < _allUsers.Count; i++)
+            {
+                var p = CreateRowItem(i + 1, _allUsers[i], false);
+                flpLeaderboard.Controls.Add(p);
+            }
+        }
+
+        private void DrawMyRank()
+        {
+            pnlMyRank.Controls.Clear();
+            int myIndex = _allUsers.FindIndex(u => u.Uid == _currentUser.Uid);
+            if (myIndex != -1)
+            {
+                var p = CreateRowItem(myIndex + 1, _allUsers[myIndex], true);
+                pnlMyRank.Controls.Add(p);
+            }
+        }
+
+        private void pnlMyRank_Paint(object sender, PaintEventArgs e) { }
+        protected override void OnPaintBackground(PaintEventArgs e) { base.OnPaintBackground(e); }
+        //-----------------------------------------
     }
 }
