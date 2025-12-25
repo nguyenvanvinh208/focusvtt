@@ -432,6 +432,58 @@ namespace Do_an.Forms
             this.Invalidate();
         }
         //--------------------
+        private void ResponsiveLayout()
+        {
+            if (this.Width == 0) return;
+            _contentWidth = Math.Min(this.Width - 40, 1000);
+            int startX = (this.Width - _contentWidth) / 2;
 
+            pnlTabs.Location = new Point(this.Width - pnlTabs.Width - 50, 20);
+
+            pnlPodium.Size = new Size(this.Width, 380);
+            pnlPodium.Location = new Point(0, 70);
+            pnlPodium.Invalidate();
+
+            int footerHeight = 70;
+            int listStartY = 480;
+            int listHeight = this.Height - listStartY - footerHeight - 10;
+            if (listHeight < 100) listHeight = 100;
+
+            pnlHeaderRow.Size = new Size(_contentWidth, 25);
+            pnlHeaderRow.Location = new Point(startX, listStartY - 30);
+            AdjustRowItems(pnlHeaderRow, false);
+
+            flpLeaderboard.Size = new Size(_contentWidth + 20, listHeight);
+            flpLeaderboard.Location = new Point(startX, listStartY);
+
+            pnlMyRank.Size = new Size(_contentWidth, footerHeight);
+            pnlMyRank.Location = new Point(startX, this.Height - footerHeight - 5);
+
+            foreach (Control c in flpLeaderboard.Controls) { c.Width = _contentWidth; AdjustRowItems(c as Panel, true); c.Invalidate(); }
+            if (pnlMyRank.Controls.Count > 0) AdjustRowItems(pnlMyRank.Controls[0] as Panel, true);
+        }
+
+        private void AdjustRowItems(Panel p, bool isRowItem)
+        {
+            if (p == null) return;
+            int w = p.Width;
+            if (isRowItem)
+            {
+                if (p.Controls.Count < 5) return;
+                p.Controls[0].Location = new Point(20, 15);  // Rank
+                p.Controls[1].Location = new Point(60, 10);  // Avatar
+                p.Controls[2].Location = new Point(110, 15); // Name
+                p.Controls[3].Location = new Point(300, 15); // Level
+                p.Controls[4].Location = new Point(w - 120, 15); // Time
+            }
+            else
+            {
+                lblH_Rank.Location = new Point(20, 5);
+                lblH_Info.Location = new Point(110, 5);
+                lblH_Lvl.Location = new Point(300, 5);
+                lblH_Time.Location = new Point(w - 120, 5);
+            }
+        }
+        //------------------------------------------------------------------
     }
 }
