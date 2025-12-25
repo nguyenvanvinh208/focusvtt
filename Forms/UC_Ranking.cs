@@ -282,5 +282,126 @@ namespace Do_an.Forms
         }
 
         //--------------------
+        // PHẦN VẼ DANH SÁCH (LIST)
+        private Panel CreateRowItem(int rank, User user, bool isMyRankPanel)
+        {
+            Panel p = new Panel();
+            p.Size = new Size(_contentWidth, 50);
+            p.Margin = new Padding(0, 0, 0, 5);
+            p.BackColor = Color.Transparent;
+
+            string uName = (user.Username ?? "Unknown").ToUpper();
+            string uLvl = "Lv." + (user.Info != null ? user.Info.Level : 1);
+            TimeSpan ts = TimeSpan.FromHours(user.Info != null ? user.Info.TotalHours : 0);
+            string uHrs = $"{(int)ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
+
+            // Sự kiện Paint để vẽ nền nét đứt
+            p.Paint += (s, e) =>
+            {
+                Graphics g = e.Graphics;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                Rectangle r = p.ClientRectangle;
+                r.Width--; r.Height--;
+
+                using (GraphicsPath path = GetRoundedPath(r, 20))
+                {
+                    // Nền trong suốt màu nâu tối (Alpha = 180)
+                    using (SolidBrush b = new SolidBrush(Color.FromArgb(180, 40, 30, 20)))
+                    {
+                        g.FillPath(b, path);
+                    }
+
+                    // Viền nét đứt (Stitched effect)
+                    using (Pen pen = new Pen(Color.Peru, 1))
+                    {
+                        pen.DashStyle = DashStyle.Dash;
+                        g.DrawPath(pen, path);
+                    }
+
+                    // Nếu là rank của mình thì thêm viền sáng
+                    if (user.Uid == _currentUser.Uid)
+                    {
+                        using (Pen pHigh = new Pen(Color.Gold, 2)) g.DrawPath(pHigh, path);
+                    }
+                }
+            };
+
+            // Rank Number
+            Label lblRank = new Label() { Text = $"#{rank}", ForeColor = Color.White, Font = new Font("Segoe UI", 11, FontStyle.Bold), AutoSize = true };
+
+            // Avatar nhỏ
+            PictureBox pic = new PictureBox() { Size = new Size(30, 30), SizeMode = PictureBoxSizeMode.StretchImage, Image = GetAvatar(user.Uid, user.Username) };
+            GraphicsPath gp = new GraphicsPath(); gp.AddEllipse(0, 0, 30, 30); pic.Region = new Region(gp);
+
+            // Thông tin
+            Label lblName = new Label() { Text = uName, ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold), AutoSize = true };
+            Label lblLvl = new Label() { Text = uLvl, ForeColor = Color.Gray, Font = new Font("Segoe UI", 9), AutoSize = true };
+            Label lblHrs = new Label() { Text = uHrs, ForeColor = Color.Gold, Font = new Font("Consolas", 11, FontStyle.Bold), AutoSize = true };
+
+            p.Controls.AddRange(new Control[] { lblRank, pic, lblName, lblLvl, lblHrs });
+
+            if (!isMyRankPanel) AdjustRowItems(p, true);
+            return p;
+        }
+
+        // HÀM QUAN TRỌNG: TẠO AVATAR MẶC ĐỊNH & XỬ LÝ ẢNH
+
+        private Image GetAvatar(string uid, string username)
+        {
+            // 1. Tìm ảnh trong thư mục UserAvatars
+            string path = Path.Combine(Application.StartupPath, "UserAvatars", $"{uid}.jpg");
+            if (File.Exists(path))
+            {
+                try
+                {
+                    // Load ảnh an toàn
+                    using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+                    {
+                        return Image.FromStream(fs);
+                    }
+                }
+                catch { }
+            }
+
+            // 2. Tìm trong Resource 
+            try
+            {
+                // Lấy dưới dạng Object để kiểm tra kiểu
+                object obj = Properties.Resources.ResourceManager.GetObject("profile");
+                if (obj != null)
+                {
+                    // Chuyển đổi an toàn
+                    Image img = ByteToImg(obj);
+                    if (img != null) return img;
+                }
+            }
+            catch { }
+
+            // 3. Fallback: Vẽ hình tròn xám có chữ cái đầu (Fix triệt để lỗi mất ảnh)
+            int size = 100;
+            Bitmap bmp = new Bitmap(size, size);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.Clear(Color.Transparent);
+
+                // Vẽ nền tròn
+                using (SolidBrush b = new SolidBrush(Color.DimGray))
+                {
+                    g.FillEllipse(b, 0, 0, size, size);
+                }
+
+                // Vẽ chữ
+                string initial = string.IsNullOrEmpty(username) ? "?" : username.Substring(0, 1).ToUpper();
+                using (Font f = new Font("Arial", 40, FontStyle.Bold))
+                {
+                    SizeF s = g.MeasureString(initial, f);
+                    g.DrawString(initial, f, Brushes.White, (size - s.Width) / 2, (size - s.Height) / 2);
+                }
+            }
+            return bmp;
+        }
+        //-------------
+
     }
 }
