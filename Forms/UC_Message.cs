@@ -392,5 +392,61 @@ namespace Do_an.Forms
             catch { }
         }
         //----
+        private void ResetRightPanel() { _currentChatId = null; lblChatName.Text = ""; flMessages.Controls.Clear(); }
+        private void DisplayMessage(bool isMine, string t, string i, string f, string fn, long s, string uid)
+        {
+            if (!string.IsNullOrEmpty(i)) AddImageBubbleFromBase64(i, isMine, true, uid);
+            else if (!string.IsNullOrEmpty(f)) AddFileBubble(fn, s, isMine, true, f, uid);
+            else AddMessageBubble(t, isMine, true, uid);
+        }
+        private void AddMessageBubble(string txt, bool m, bool s, string u)
+        {
+            int maxW = (int)(flMessages.ClientSize.Width * 0.65);
+            // Tin của mình: Chữ trắng (trên nền gỗ tối). Tin người khác: Chữ nâu đen (trên nền giấy cũ)
+            Color txtColor = m ? Color.White : Color.FromArgb(40, 20, 10);
+
+            Label l = new Label { Text = txt, Font = new Font("Segoe UI", 11), AutoSize = true, MaximumSize = new Size(maxW, 0), BackColor = Color.Transparent, ForeColor = txtColor };
+            Panel b = new Panel { AutoSize = true, Padding = new Padding(12, 10, 12, 10) };
+
+            // Dùng màu Vintage định nghĩa ở trên
+            Color c = m ? clrMineMsg : clrOtherMsg;
+
+            b.Paint += (o, e) => { e.Graphics.SmoothingMode = SmoothingMode.AntiAlias; using (var p = GetBubblePath(new Rectangle(0, 0, b.Width - 1, b.Height - 1), 15, m)) using (var br = new SolidBrush(c)) e.Graphics.FillPath(br, p); };
+            b.Controls.Add(l); AddRow(b, m, u);
+        }
+        private void AddImageBubbleFromBase64(string str, bool m, bool s, string u) { try { using (var ms = new MemoryStream(Convert.FromBase64String(str))) { var img = Image.FromStream(ms); var p = new PictureBox { Image = (Image)img.Clone(), SizeMode = PictureBoxSizeMode.Zoom, Size = new Size(200, 200) }; var b = new Panel { AutoSize = true }; b.Controls.Add(p); AddRow(b, m, u); } } catch { } }
+
+        // [FIX LỖI BẤM TẢI FILE]
+        private void AddFileBubble(string n, long sz, bool m, bool s, string f, string u)
+        {
+            // Bubble file cũng theo tông màu Vintage
+            var b = new Panel { Size = new Size(200, 60), BackColor = m ? Color.SaddleBrown : Color.Tan, Tag = new FileBubbleTag { FileName = n, FileBase64 = f } };
+
+            Label l1 = new Label { Text = n, ForeColor = Color.White, Font = new Font("Segoe UI", 9, FontStyle.Bold), Location = new Point(10, 10), AutoSize = true };
+            Label l2 = new Label { Text = (sz / 1024) + " KB", ForeColor = Color.WhiteSmoke, Location = new Point(10, 35), AutoSize = true };
+
+            b.Controls.Add(l1);
+            b.Controls.Add(l2);
+
+            // Gán sự kiện click cho cả Panel và Labels để bấm đâu cũng ăn
+            EventHandler clickHandler = (o, e) => DownloadFile((FileBubbleTag)b.Tag);
+            b.Click += clickHandler;
+            l1.Click += clickHandler;
+            l2.Click += clickHandler;
+
+            AddRow(b, m, u);
+        }
+
+        private void DownloadFile(FileBubbleTag t) { using (var s = new SaveFileDialog { FileName = t.FileName }) if (s.ShowDialog() == DialogResult.OK) File.WriteAllBytes(s.FileName, Convert.FromBase64String(t.FileBase64)); }
+        private void AddRow(Control b, bool m, string u) { var r = new Panel { Width = flMessages.ClientSize.Width - 25, Tag = m, BackColor = Color.Transparent }; if (!m && !string.IsNullOrEmpty(u)) { var pb = new CircularPictureBox { Size = new Size(28, 28), Location = new Point(5, r.Height - 30), SizeMode = PictureBoxSizeMode.StretchImage }; try { string p = Path.Combine(_avatarFolder, u + ".jpg"); pb.Image = File.Exists(p) ? Image.FromFile(p) : null; } catch { } r.Controls.Add(pb); } r.Controls.Add(b); flMessages.Controls.Add(r); LayoutRow(r); r.Height = b.Height + 10; flMessages.ScrollControlIntoView(r); }
+        private void LayoutRow(Panel r) { bool m = (bool)r.Tag; foreach (Control c in r.Controls) if (c is Panel) c.Location = m ? new Point(r.Width - c.Width - 10, 0) : new Point(40, 0); }
+        private void RelayoutAllRows() { foreach (Control c in flMessages.Controls) if (c is Panel p) { p.Width = flMessages.ClientSize.Width - 25; LayoutRow(p); } }
+        private GraphicsPath GetBubblePath(Rectangle r, int d, bool m) { var p = new GraphicsPath(); int d2 = d * 2; p.AddArc(r.X, r.Y, d2, d2, 180, 90); p.AddArc(r.Right - d2, r.Y, d2, d2, 270, 90); if (m) { p.AddLine(r.Right, r.Bottom - d, r.Right, r.Bottom); p.AddLine(r.Right, r.Bottom, r.Right - d, r.Bottom); } else p.AddArc(r.Right - d2, r.Bottom - d2, d2, d2, 0, 90); if (!m) { p.AddLine(r.X + d, r.Bottom, r.X, r.Bottom); p.AddLine(r.X, r.Bottom, r.X, r.Bottom - d); } else p.AddArc(r.X, r.Bottom - d2, d2, d2, 90, 90); p.CloseFigure(); return p; }
+        private void FilterChatList(string k) { k = k.ToLower(); foreach (Control c in flChatList.Controls) c.Visible = c.Tag.ToString().ToLower().Contains(k); }
+        private void BuildEmojiMenu() { _emojiMenu = new ContextMenuStrip(); string[] em = { "😀", "😂", "🥰", "😎", "👍", "❤️" }; foreach (var e in em) _emojiMenu.Items.Add(e, null, (s, ev) => txtMessage.AppendText(e)); }
+        private void btnEmoji_Click(object s, EventArgs e) => _emojiMenu.Show(btnEmoji, 0, -100);
+        private async void btnImage_Click(object s, EventArgs e) { if (_currentChatId == null) return; var o = new OpenFileDialog(); if (o.ShowDialog() == DialogResult.OK) { string b64 = Convert.ToBase64String(File.ReadAllBytes(o.FileName)); await SendPrivateMessage(CurrentUserUid, _idToUid[_currentChatId], null, b64, null, 0); await CheckIncomingMessages(); } }
+        private async void btnAttach_Click(object s, EventArgs e) { if (_currentChatId == null) return; var o = new OpenFileDialog(); if (o.ShowDialog() == DialogResult.OK) { string b64 = Convert.ToBase64String(File.ReadAllBytes(o.FileName)); FileInfo f = new FileInfo(o.FileName); await SendPrivateMessage(CurrentUserUid, _idToUid[_currentChatId], null, null, b64, f.Length, f.Name); await CheckIncomingMessages(); } }
+
     }
 }
