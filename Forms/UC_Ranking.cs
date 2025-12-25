@@ -510,5 +510,16 @@ namespace Do_an.Forms
         private void pnlMyRank_Paint(object sender, PaintEventArgs e) { }
         protected override void OnPaintBackground(PaintEventArgs e) { base.OnPaintBackground(e); }
         //-----------------------------------------
+        private GraphicsPath GetRoundedPath(Rectangle rect, int radius)
+        {
+            GraphicsPath path = new GraphicsPath();
+            float d = radius * 2F;
+            path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+            path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+            path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+            path.CloseFigure();
+            return path;
+        }
     }
 }
