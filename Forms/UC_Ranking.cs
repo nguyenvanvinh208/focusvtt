@@ -63,5 +63,30 @@ namespace Do_an.Forms
             SetupTabButtons();
 
         }
+        //------
+        private void UC_Ranking_Load(object sender, EventArgs e)
+        {
+            SwitchTab(true);
+            ResponsiveLayout();
+
+            // Timer tự động cập nhật BXH mỗi 5 giây
+            _refreshTimer = new System.Windows.Forms.Timer();
+            _refreshTimer.Interval = 5000;
+            _refreshTimer.Tick += async (s, ev) => await LoadData();
+            _refreshTimer.Start();
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            if (_refreshTimer != null) { _refreshTimer.Stop(); _refreshTimer.Dispose(); }
+            base.OnHandleDestroyed(e);
+        }
+
+        private void SetupTabButtons()
+        {
+            btnTabGlobal.Click += (s, e) => SwitchTab(true);
+            btnTabFriends.Click += (s, e) => SwitchTab(false);
+        }
+        //-----
     }
 }
