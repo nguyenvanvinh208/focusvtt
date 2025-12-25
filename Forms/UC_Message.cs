@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -173,6 +174,49 @@ namespace Do_an.Forms
         }
 
         private string GetTimeAgo(string s) { if (string.IsNullOrEmpty(s)) return "gần đây"; if (DateTime.TryParse(s, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime t)) { var d = DateTime.UtcNow - t; if (d.TotalMinutes < 1) return "vừa xong"; if (d.TotalMinutes < 60) return (int)d.TotalMinutes + " phút trước"; return (int)d.TotalDays + " ngày trước"; } return "gần đây"; }
+        private async Task LoadChatList()
+        {
+            if (!EnsureInitialized()) return;
+            flChatList.Controls.Clear(); _idToUid.Clear(); _idToName.Clear(); _groupIds.Clear(); _chatPanels.Clear();
+            try
+            {
+                var friends = await _dbService.GetFriendsAsync(CurrentUserUid);
+                if (friends != null) foreach (var u in friends)
+                    {
+                        _idToUid[u.Email] = u.Uid; _idToName[u.Email] = u.Username ?? u.Email;
+                        _chatPanels[u.Email] = AddChatItemToUI(u.Username ?? u.Email, u.IsOnline ? "Online" : "Offline", u.Email, u.Uid, false);
+                    }
+                var groups = await _dbService.GetUserGroupsAsync(CurrentUserUid);
+                if (groups != null) foreach (var g in groups)
+                    {
+                        _groupIds.Add(g.GroupId); _idToName[g.GroupId] = g.Name;
+                        _chatPanels[g.GroupId] = AddChatItemToUI(g.Name, "Nhóm", g.GroupId, null, true);
+                    }
+            }
+            catch { }
+        }
 
+        private Panel AddChatItemToUI(string name, string status, string id, string uid, bool isGroup)
+        {
+            // Panel list item - Background Transparent để ăn theo màu Bookshelf
+            Panel p = new Panel { Name = id, Size = new Size(flChatList.Width - 20, 72), Margin = new Padding(10, 5, 10, 5), BackColor = Color.Transparent, Cursor = Cursors.Hand, Tag = name };
+            CircularPictureBox pic = new CircularPictureBox { Size = new Size(50, 50), Location = new Point(10, 11), SizeMode = PictureBoxSizeMode.StretchImage };
+            if (isGroup) { Bitmap b = new Bitmap(50, 50); using (Graphics g = Graphics.FromImage(b)) { g.Clear(Color.SaddleBrown); g.DrawString("G", new Font("Arial", 20, FontStyle.Bold), Brushes.White, 10, 10); } pic.Image = b; }
+            else { try { string pt = Path.Combine(_avatarFolder, uid + ".jpg"); if (File.Exists(pt)) pic.Image = Image.FromFile(pt); else pic.BackColor = Color.Peru; } catch { pic.BackColor = Color.Peru; } }
+            p.Controls.Add(pic);
+            Panel dot = new Panel { Size = new Size(14, 14), BackColor = Color.FromArgb(49, 162, 76), Location = new Point(48, 48), Visible = (status == "Online") };
+            GraphicsPath gp = new GraphicsPath(); gp.AddEllipse(0, 0, 14, 14); dot.Region = new Region(gp);
+            if (!isGroup) p.Controls.Add(dot); dot.BringToFront();
+
+            // Text Color: White/Light Beige trên nền gỗ tối
+            p.Controls.Add(new Label { Text = name, Font = new Font("Segoe UI", 11, FontStyle.Bold), ForeColor = Color.NavajoWhite, Location = new Point(70, 15), AutoSize = true });
+            p.Controls.Add(new Label { Text = status, Font = new Font("Segoe UI", 9), ForeColor = (status == "Online" ? Color.LimeGreen : Color.Gray), Location = new Point(70, 40), AutoSize = true });
+
+            // Hover Color: Gỗ sáng hơn chút
+            p.MouseEnter += (s, e) => p.BackColor = Color.FromArgb(60, 40, 30);
+            p.MouseLeave += (s, e) => p.BackColor = Color.Transparent;
+            p.Click += (s, e) => SwitchConversation(id, isGroup);
+            flChatList.Controls.Add(p); return p;
+        }
     }
 }
