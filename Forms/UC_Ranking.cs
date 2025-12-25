@@ -88,5 +88,68 @@ namespace Do_an.Forms
             btnTabFriends.Click += (s, e) => SwitchTab(false);
         }
         //-----
+        private async void SwitchTab(bool isGlobal)
+        {
+            _isGlobal = isGlobal;
+            if (isGlobal)
+            {
+                btnTabGlobal.BackColor = clrWoodLight;
+                btnTabGlobal.ForeColor = Color.White;
+                btnTabFriends.BackColor = Color.Transparent;
+                btnTabFriends.ForeColor = Color.Gray;
+            }
+            else
+            {
+                btnTabFriends.BackColor = clrWoodLight;
+                btnTabFriends.ForeColor = Color.White;
+                btnTabGlobal.BackColor = Color.Transparent;
+                btnTabGlobal.ForeColor = Color.Gray;
+            }
+            await LoadData();
+        }
+
+        // --- TẢI DỮ LIỆU TỪ FIREBASE ---
+        private async Task LoadData()
+        {
+            try
+            {
+                // Cập nhật rank của bản thân trước
+                await _dbService.CalculateAndSaveRankAsync(_currentUser.Uid);
+                var updatedMe = await _dbService.GetUserAsync(_currentUser.Uid);
+                if (updatedMe != null) _currentUser = updatedMe;
+
+                List<User> data;
+                if (_isGlobal)
+                {
+                    data = await _dbService.GetAllUsersAsync();
+                }
+                else
+                {
+                    data = await _dbService.GetFriendsAsync(_currentUser.Uid);
+                    // Đảm bảo mình luôn có trong list bạn bè để so sánh
+                    if (!data.Any(u => u.Uid == _currentUser.Uid)) data.Add(_currentUser);
+                }
+
+                // Sắp xếp: Giờ học giảm dần -> Level giảm dần
+                _allUsers = data.OrderByDescending(u => u.Info.TotalHours)
+                                .ThenByDescending(u => u.Info.Level)
+                                .ToList();
+
+                // Vẽ lại giao diện
+                if (!this.IsDisposed && this.IsHandleCreated)
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        pnlPodium.Invalidate();
+                        DrawList();
+                        DrawMyRank();
+                        ResponsiveLayout();
+                    });
+                }
+            }
+            catch (Exception) { }
+        }
+
+        //-----
     }
 }
