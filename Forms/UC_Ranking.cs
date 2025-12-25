@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -151,5 +152,135 @@ namespace Do_an.Forms
         }
 
         //-----
+
+        // PHẦN VẼ BỤC VINH QUANG (PODIUM) - ĐÃ FIX LỖI LAYER & AVATAR
+
+        private void pnlPodium_Paint(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            int cx = pnlPodium.Width / 2;
+
+            // Vẽ theo thứ tự: Rank 2 (Trái) -> Rank 3 (Phải) -> Rank 1 (Giữa)
+            if (_allUsers.Count > 1) DrawPlaque(g, 2, _allUsers[1], cx - 220, 160, clrWoodLight);
+            if (_allUsers.Count > 2) DrawPlaque(g, 3, _allUsers[2], cx + 220, 160, clrWoodLight);
+            if (_allUsers.Count > 0) DrawPlaque(g, 1, _allUsers[0], cx, 190, clrRedRoyal);
+        }
+
+        private void DrawPlaque(Graphics g, int rank, User user, int centerX, int boxSize, Color baseColor)
+        {
+            // 1. TÍNH TOÁN TỌA ĐỘ
+            int boxTopY = 130;
+            if (rank == 1) boxTopY = 100; // Rank 1 cao hơn
+
+            // Hình chữ nhật của cái hộp
+            Rectangle rectBox = new Rectangle(centerX - (boxSize / 2), boxTopY, boxSize, boxSize);
+
+            // Kích thước Avatar
+            int avaSize = (rank == 1) ? 80 : 65;
+            int avaX = centerX - (avaSize / 2);
+            int avaY = boxTopY - (avaSize / 2); // Avatar nằm giữa cạnh trên của hộp
+
+            using (Pen pLine = new Pen(Color.FromArgb(50, 255, 255, 255), 1))
+            {
+                g.DrawLine(pLine, centerX, 0, centerX, boxTopY);
+            }
+
+            // Vẽ Hộp (Plaque)
+            using (GraphicsPath path = GetRoundedPath(rectBox, 15))
+            {
+                // Gradient màu nền hộp
+                using (LinearGradientBrush b = new LinearGradientBrush(rectBox, ControlPaint.Light(baseColor), baseColor, 90F))
+                {
+                    g.FillPath(b, path);
+                }
+                // Viền hộp màu vàng
+                using (Pen p = new Pen(clrGold, 2))
+                {
+                    g.DrawPath(p, path);
+                }
+            }
+            // LAYER 2: VẼ SỐ HẠNG & THÔNG TIN TRÊN HỘP
+
+            // Vẽ Số Hạng (1, 2, 3) nằm giữa hộp
+            using (Font f = new Font("Georgia", 55, FontStyle.Bold))
+            {
+                string rankStr = rank.ToString();
+                SizeF size = g.MeasureString(rankStr, f);
+                float textX = centerX - (size.Width / 2);
+                float textY = boxTopY + (boxSize / 2) - (size.Height / 2) + 10; // Dịch xuống 1 chút
+
+                // Bóng chữ đen
+                g.DrawString(rankStr, f, Brushes.Black, textX + 3, textY + 3);
+                // Chữ chính màu vàng
+                using (SolidBrush bText = new SolidBrush(clrGold))
+                    g.DrawString(rankStr, f, bText, textX, textY);
+            }
+
+            // Vẽ Thời gian (Dưới đáy hộp, bên ngoài)
+            TimeSpan ts = TimeSpan.FromHours(user.Info.TotalHours);
+            string timeStr = $"{ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
+            using (Font fTime = new Font("Consolas", 10, FontStyle.Bold))
+            {
+                SizeF sTime = g.MeasureString(timeStr, fTime);
+                g.DrawString(timeStr, fTime, Brushes.WhiteSmoke, centerX - (sTime.Width / 2), boxTopY + boxSize + 5);
+            }
+
+            // LAYER 3: VẼ AVATAR (NỔI LÊN TRÊN HỘP) - VẼ SAU CÙNG ĐỂ KHÔNG BỊ CHE
+
+            Image avatarImg = GetAvatar(user.Uid, user.Username);
+
+            // 1. Vẽ bóng đổ sau lưng Avatar (để tách biệt với hộp)
+            using (SolidBrush shadow = new SolidBrush(Color.FromArgb(100, 0, 0, 0)))
+            {
+                g.FillEllipse(shadow, avaX + 2, avaY + 2, avaSize, avaSize);
+            }
+
+            // 2. Vẽ Avatar (Cắt hình tròn)
+            GraphicsPath pathAva = new GraphicsPath();
+            pathAva.AddEllipse(avaX, avaY, avaSize, avaSize);
+
+            g.SetClip(pathAva);
+            g.DrawImage(avatarImg, avaX, avaY, avaSize, avaSize);
+            g.ResetClip();
+
+            // 3. Vẽ Viền Avatar
+            Color borderCol = (rank == 1) ? clrGold : Color.Silver;
+            using (Pen pAva = new Pen(borderCol, 3))
+            {
+                g.DrawEllipse(pAva, avaX, avaY, avaSize, avaSize);
+            }
+
+            // LAYER 4: VẼ PHỤ KIỆN & TÊN 
+
+            if (rank == 1)
+            {
+                // Vương miện: Vẽ cao hơn Avatar
+                using (Font fIcon = new Font("Segoe UI Emoji", 28))
+                    g.DrawString("👑", fIcon, Brushes.Gold, centerX - 28, avaY - 55);
+
+                // Ổ khóa (trang trí)
+                using (Font fIcon = new Font("Segoe UI Emoji", 16))
+                    g.DrawString("🔒", fIcon, Brushes.White, centerX - 12, boxTopY + 5);
+            }
+            else
+            {
+                // Vòng hào quang (Halo)
+                using (Pen pRing = new Pen(Color.Gold, 2))
+                    g.DrawEllipse(pRing, centerX - 20, avaY - 20, 40, 12);
+            }
+
+            // Tên User: Vẽ trên cùng
+            string uName = (user.Username ?? "Unknown").ToUpper();
+            if (uName.Length > 12) uName = uName.Substring(0, 10) + "..";
+            using (Font fName = new Font("Segoe UI", 10, FontStyle.Bold))
+            {
+                SizeF sName = g.MeasureString(uName, fName);
+                // Vẽ tên màu trắng
+                g.DrawString(uName, fName, Brushes.White, centerX - (sName.Width / 2), avaY - 40);
+            }
+        }
+
+        //--------------------
     }
 }
