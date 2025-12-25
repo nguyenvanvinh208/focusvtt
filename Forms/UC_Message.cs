@@ -106,6 +106,73 @@ namespace Do_an.Forms
             flMessages.SizeChanged += (s, e) => RelayoutAllRows();
             BuildEmojiMenu();
         }
+        public void InitializeCurrentUser(string uid, string email) { CurrentUserUid = uid; CurrentUserEmail = email; _initialized = true; InitMessagePolling(); }
+        private bool EnsureInitialized() => _initialized && !string.IsNullOrEmpty(CurrentUserUid);
+        private async void UC_Message_Load(object sender, EventArgs e) => await LoadChatList();
+
+        private void InitMessagePolling()
+        {
+            if (_pollTimer != null) { _pollTimer.Stop(); _pollTimer.Dispose(); }
+
+            // [ĐÃ CHỈNH SỬA] Tăng Interval lên 3000 (3 giây)
+            // Bạn có thể sửa thành 5000 (5 giây) nếu muốn lâu hơn nữa
+            _pollTimer = new System.Windows.Forms.Timer { Interval = 3000 };
+
+            _pollTimer.Tick += async (s, e) => {
+                await CheckIncomingMessages();
+                await UpdateFriendStatusUI();
+                await _dbService.UpdateUserActivity(CurrentUserUid, true);
+            };
+            _pollTimer.Start();
+        }
+        private async Task UpdateFriendStatusUI()
+        {
+            try
+            {
+                var friends = await _dbService.GetFriendsAsync(CurrentUserUid);
+                if (friends == null) return;
+                foreach (var u in friends)
+                {
+                    if (string.IsNullOrEmpty(u.Email)) continue;
+
+                    // Sync Avatar
+                    if (!string.IsNullOrEmpty(u.AvatarBase64))
+                    {
+                        string localPath = Path.Combine(_avatarFolder, u.Uid + ".jpg");
+                        try
+                        {
+                            if (!File.Exists(localPath))
+                            {
+                                byte[] b = Convert.FromBase64String(u.AvatarBase64);
+                                File.WriteAllBytes(localPath, b);
+                                if (_chatPanels.TryGetValue(u.Email, out Panel pp))
+                                    foreach (Control c in pp.Controls) if (c is CircularPictureBox pc) using (var ms = new MemoryStream(b)) pc.Image = Image.FromStream(ms);
+                            }
+                        }
+                        catch { }
+                    }
+
+                    if (_chatPanels.TryGetValue(u.Email, out Panel p))
+                    {
+                        bool isOnline = u.IsOnline;
+                        if (isOnline && !string.IsNullOrEmpty(u.LastActive))
+                        {
+                            if (DateTime.TryParse(u.LastActive, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime t))
+                                if ((DateTime.UtcNow - t).TotalMinutes > 2) isOnline = false;
+                        }
+                        foreach (Control c in p.Controls)
+                        {
+                            if (c is Label lbl && c.Location.Y > 30) { lbl.Text = isOnline ? "Online" : "Offline"; lbl.ForeColor = isOnline ? Color.LimeGreen : Color.Gray; }
+                            if (c is Panel dot && c.Height < 20) dot.Visible = isOnline;
+                        }
+                        if (_currentChatId == u.Email && !_isGroupChat) lblChatStatus.Text = isOnline ? "Đang hoạt động" : "Truy cập " + GetTimeAgo(u.LastActive);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private string GetTimeAgo(string s) { if (string.IsNullOrEmpty(s)) return "gần đây"; if (DateTime.TryParse(s, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime t)) { var d = DateTime.UtcNow - t; if (d.TotalMinutes < 1) return "vừa xong"; if (d.TotalMinutes < 60) return (int)d.TotalMinutes + " phút trước"; return (int)d.TotalDays + " ngày trước"; } return "gần đây"; }
 
     }
 }
