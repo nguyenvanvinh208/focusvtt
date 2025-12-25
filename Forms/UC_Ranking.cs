@@ -402,6 +402,36 @@ namespace Do_an.Forms
             return bmp;
         }
         //-------------
+        private Image ByteToImg(object resource)
+        {
+            if (resource == null) return null;
+
+            // Nếu đã là Image thì trả về luôn
+            if (resource is Image img) return img;
+
+            // Nếu là byte[] thì chuyển thành Image
+            if (resource is byte[] bytes)
+            {
+                try
+                {
+                    return Image.FromStream(new MemoryStream(bytes));
+                }
+                catch { return null; }
+            }
+
+            return null;
+        }
+
+        // --- CÁC HÀM HỖ TRỢ UI KHÁC ---
+        private void LblMenu_Click(object sender, EventArgs e) => OnMenuClicked?.Invoke();
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ResponsiveLayout();
+            this.Invalidate();
+        }
+        //--------------------
 
     }
 }
