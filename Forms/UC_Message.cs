@@ -1,4 +1,5 @@
 ﻿using Do_an.Firebase;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -175,6 +176,7 @@ namespace Do_an.Forms
 
         private string GetTimeAgo(string s) { if (string.IsNullOrEmpty(s)) return "gần đây"; if (DateTime.TryParse(s, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime t)) { var d = DateTime.UtcNow - t; if (d.TotalMinutes < 1) return "vừa xong"; if (d.TotalMinutes < 60) return (int)d.TotalMinutes + " phút trước"; return (int)d.TotalDays + " ngày trước"; } return "gần đây"; }
         private async Task LoadChatList()
+            
         {
             if (!EnsureInitialized()) return;
             flChatList.Controls.Clear(); _idToUid.Clear(); _idToName.Clear(); _groupIds.Clear(); _chatPanels.Clear();
@@ -218,5 +220,83 @@ namespace Do_an.Forms
             p.Click += (s, e) => SwitchConversation(id, isGroup);
             flChatList.Controls.Add(p); return p;
         }
+        //------
+
+        private async void SwitchConversation(string id, bool isGroup)
+        {
+            _currentChatId = id;
+            _isGroupChat = isGroup;
+
+            // Lấy tên hiển thị
+            string displayName = _idToName.ContainsKey(id) ? _idToName[id] : id;
+            lblChatName.Text = displayName;
+
+            // Xử lý Avatar
+            if (!isGroup && _idToUid.ContainsKey(id))
+            {
+                try
+                {
+                    string pt = Path.Combine(_avatarFolder, _idToUid[id] + ".jpg");
+                    if (File.Exists(pt))
+                        picChatAvatar.Image = Image.FromFile(pt);
+                    else
+                        picChatAvatar.BackColor = Color.Peru;
+                }
+                catch { picChatAvatar.BackColor = Color.Peru; }
+            }
+            else
+            {
+                // Avatar Nhóm (Vẽ chữ cái đầu)
+                Bitmap b = new Bitmap(50, 50);
+                using (Graphics g = Graphics.FromImage(b))
+                {
+                    g.Clear(Color.SaddleBrown);
+                    string firstLetter = string.IsNullOrEmpty(displayName) ? "G" : displayName.Substring(0, 1).ToUpper();
+                    g.DrawString(firstLetter, new Font("Arial", 20, FontStyle.Bold), Brushes.White, 10, 10);
+                }
+                picChatAvatar.Image = b;
+            }
+
+            // --- [FIX LỖI MẤT TIN NHẮN KHI CLICK LẠI] ---
+            if (_seenMessageIds.ContainsKey(id))
+            {
+                _seenMessageIds[id].Clear();
+            }
+            // ---------------------------------------------
+
+            flMessages.Controls.Clear();
+            await LoadHistory(id, isGroup);
+        }
+
+        private async Task LoadHistory(string id, bool isGroup)
+        {
+            try
+            {
+                string t = DateTime.Now.Ticks.ToString();
+                string url = isGroup ? $"{FirebaseBaseUrl}/GroupMessages/{id}.json?t={t}" : $"{FirebaseBaseUrl}/Messages/{CurrentUserUid}.json?t={t}";
+                string json = await Http.GetStringAsync(url);
+                if (string.IsNullOrEmpty(json) || json == "null") { _conversations[id] = new List<ChatMessage>(); return; }
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, FirebaseMessage>>(json);
+                var list = dict.Select(x => new { Key = x.Key, Val = x.Value }).OrderBy(x => x.Val.timestamp).ToList();
+
+                if (!_seenMessageIds.ContainsKey(id)) _seenMessageIds[id] = new HashSet<string>();
+
+                string targetUid = (!isGroup && _idToUid.ContainsKey(id)) ? _idToUid[id] : "";
+
+                foreach (var item in list)
+                {
+                    if (_seenMessageIds[_currentChatId].Contains(item.Key)) continue;
+
+                    if (!_isGroupChat && item.Val.peerUid != targetUid) continue; // Lọc tin nhắn theo UID
+
+                    _seenMessageIds[id].Add(item.Key);
+                    bool mine = isGroup ? (item.Val.peerUid == CurrentUserUid) : item.Val.isMine;
+                    DisplayMessage(mine, item.Val.text, item.Val.imageBase64, item.Val.fileBase64, item.Val.fileName, item.Val.fileSize, isGroup ? item.Val.peerUid : "");
+                }
+                if (flMessages.Controls.Count > 0) flMessages.ScrollControlIntoView(flMessages.Controls[flMessages.Controls.Count - 1]);
+            }
+            catch { }
+        }
+        //--------------
     }
 }
