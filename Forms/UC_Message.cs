@@ -335,5 +335,62 @@ namespace Do_an.Forms
             await CheckIncomingMessages();
         }
         //------------
+        private async Task SendPrivateMessage(string f, string t, string txt, string i, string fi, long sz, string fn = null)
+        {
+            string ts = DateTime.UtcNow.ToString("o");
+            var ms = new FirebaseMessage { text = txt, isMine = true, timestamp = ts, peerUid = t, peerEmail = _currentChatId, imageBase64 = i, fileBase64 = fi, fileName = fn, fileSize = sz };
+            var mr = new FirebaseMessage { text = txt, isMine = false, timestamp = ts, peerUid = f, peerEmail = CurrentUserEmail, imageBase64 = i, fileBase64 = fi, fileName = fn, fileSize = sz };
+            try { await Http.PostAsync($"{FirebaseBaseUrl}/Messages/{f}.json", new StringContent(JsonConvert.SerializeObject(ms), Encoding.UTF8, "application/json")); await Http.PostAsync($"{FirebaseBaseUrl}/Messages/{t}.json", new StringContent(JsonConvert.SerializeObject(mr), Encoding.UTF8, "application/json")); } catch { }
+        }
+
+        private async Task CheckIncomingMessages()
+        {
+            if (string.IsNullOrEmpty(CurrentUserUid)) return;
+            try
+            {
+                string callUrl = $"{FirebaseBaseUrl}/CallRequests/{CurrentUserUid}.json?t={DateTime.Now.Ticks}";
+                string callJson = await Http.GetStringAsync(callUrl);
+                if (!string.IsNullOrEmpty(callJson) && callJson != "null")
+                {
+                    var call = JsonConvert.DeserializeObject<CallInfo>(callJson);
+                    if (call != null && call.Status == "Dialing")
+                    {
+                        _pollTimer.Stop();
+                        using (var f = new FormVideoCall(call.CallerName, call.CallerUid, CurrentUserUid, true, false, call.Type)) f.ShowDialog();
+                        _pollTimer.Start();
+                    }
+                }
+            }
+            catch { }
+
+            if (string.IsNullOrEmpty(_currentChatId)) return;
+            try
+            {
+                string t = DateTime.Now.Ticks.ToString();
+                string url = _isGroupChat ? $"{FirebaseBaseUrl}/GroupMessages/{_currentChatId}.json?t={t}" : $"{FirebaseBaseUrl}/Messages/{CurrentUserUid}.json?t={t}";
+                string json = await Http.GetStringAsync(url);
+                if (string.IsNullOrEmpty(json) || json == "null") return;
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, FirebaseMessage>>(json);
+                var list = dict.Select(x => new { Key = x.Key, Val = x.Value }).OrderBy(x => x.Val.timestamp).ToList();
+
+                if (!_seenMessageIds.ContainsKey(_currentChatId)) _seenMessageIds[_currentChatId] = new HashSet<string>();
+
+                string targetUid = (!_isGroupChat && _idToUid.ContainsKey(_currentChatId)) ? _idToUid[_currentChatId] : "";
+
+                foreach (var item in list)
+                {
+                    if (_seenMessageIds[_currentChatId].Contains(item.Key)) continue;
+
+                    if (!_isGroupChat && item.Val.peerUid != targetUid) continue;
+
+                    _seenMessageIds[_currentChatId].Add(item.Key);
+                    bool mine = _isGroupChat ? (item.Val.peerUid == CurrentUserUid) : item.Val.isMine;
+                    DisplayMessage(mine, item.Val.text, item.Val.imageBase64, item.Val.fileBase64, item.Val.fileName, item.Val.fileSize, _isGroupChat ? item.Val.peerUid : "");
+                }
+                if (flMessages.Controls.Count > 0) flMessages.ScrollControlIntoView(flMessages.Controls[flMessages.Controls.Count - 1]);
+            }
+            catch { }
+        }
+        //----
     }
 }
