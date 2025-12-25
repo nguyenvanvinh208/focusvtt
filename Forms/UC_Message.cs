@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -298,5 +299,41 @@ namespace Do_an.Forms
             catch { }
         }
         //--------------
+        private async Task MakeCall(string type)
+        {
+            if (string.IsNullOrEmpty(_currentChatId)) return;
+            try
+            {
+                string name = _isGroupChat ? $"Nhóm: {lblChatName.Text}" : CurrentUserEmail;
+                if (_isGroupChat)
+                {
+                    var mems = await _dbService.GetGroupMemberUidsAsync(_currentChatId);
+                    foreach (var u in mems) if (u != CurrentUserUid) await _dbService.SendCallRequestAsync(u, new CallInfo { CallerUid = CurrentUserUid, CallerName = name, Type = type, Status = "Dialing" });
+                    using (var f = new FormVideoCall(lblChatName.Text, _currentChatId, CurrentUserUid, false, true, type)) f.ShowDialog();
+                }
+                else
+                {
+                    if (_idToUid.TryGetValue(_currentChatId, out string uid))
+                    {
+                        await _dbService.SendCallRequestAsync(uid, new CallInfo { CallerUid = CurrentUserUid, CallerName = name, Type = type, Status = "Dialing" });
+                        using (var f = new FormVideoCall(lblChatName.Text, uid, CurrentUserUid, false, false, type)) f.ShowDialog();
+                    }
+                }
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
+
+        private async void btnSend_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtMessage.Text) || string.IsNullOrEmpty(_currentChatId)) return;
+            string txt = txtMessage.Text.Trim();
+            txtMessage.Clear(); // Chỉ xóa text, không hiện local để tránh spam
+
+            if (_isGroupChat) await _dbService.SendGroupMessageAsync(_currentChatId, CurrentUserUid, CurrentUserEmail, new FirebaseMessage { text = txt, timestamp = DateTime.UtcNow.ToString("o"), peerUid = CurrentUserUid, senderName = CurrentUserEmail });
+            else if (_idToUid.TryGetValue(_currentChatId, out string uid)) await SendPrivateMessage(CurrentUserUid, uid, txt, null, null, 0);
+
+            await CheckIncomingMessages();
+        }
+        //------------
     }
 }
