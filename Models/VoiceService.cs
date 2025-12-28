@@ -66,5 +66,46 @@ namespace Do_an.Models
                 Stop();
             }
         }
+        private void OnVoiceCaptured(object sender, WaveInEventArgs e)
+        {
+            if (!_isListening || _udpClient == null || _remoteEndPoint == null) return;
+            try
+            {
+                _udpClient.Send(e.Buffer, e.BytesRecorded, _remoteEndPoint);
+            }
+            catch { }
+        }
+
+        private void ReceiveCallback(IAsyncResult ar)
+        {
+            try
+            {
+                if (_udpClient == null || !_isListening) return;
+
+                IPEndPoint remoteIp = new IPEndPoint(IPAddress.Any, 0);
+                byte[] receivedBytes = _udpClient.EndReceive(ar, ref remoteIp);
+
+                if (receivedBytes.Length > 0 && _waveProvider != null)
+                {
+                    _waveProvider.AddSamples(receivedBytes, 0, receivedBytes.Length);
+                }
+
+                if (_isListening && _udpClient != null)
+                    _udpClient.BeginReceive(new AsyncCallback(ReceiveCallback), null);
+            }
+            catch { }
+        }
+
+        public void Stop()
+        {
+            _isListening = false;
+            try
+            {
+                if (_waveIn != null) { _waveIn.StopRecording(); _waveIn.Dispose(); _waveIn = null; }
+                if (_udpClient != null) { _udpClient.Close(); _udpClient = null; }
+                if (_waveProvider != null) _waveProvider.ClearBuffer();
+            }
+            catch { }
+        }
     }
 }
