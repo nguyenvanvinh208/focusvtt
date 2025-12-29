@@ -13,19 +13,6 @@ using Do_an.Models;
 using System.Text;
 using System.Linq;
 using System.Dynamic;
-﻿using Do_an.Firebase;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Do_an.Forms
 {
@@ -38,10 +25,6 @@ namespace Do_an.Forms
         private ContextMenuStrip _emojiMenu;
         private ContextMenuStrip _friendMenu;
 
-
-
-        private readonly Color clrMineMsg = Color.FromArgb(101, 67, 33);
-        private readonly Color clrOtherMsg = Color.FromArgb(218, 200, 162);
         // --- THAY ĐỔI MÀU BONG BÓNG CHAT (THEME VINTAGE) ---
         // Tin nhắn của mình: Màu gỗ tối/da bò
         private readonly Color clrMineMsg = Color.FromArgb(101, 67, 33);
@@ -74,7 +57,6 @@ namespace Do_an.Forms
         {
             InitializeComponent();
             Dock = DockStyle.Fill;
-            this.BackColor = Color.White; 
             this.BackColor = Color.White; // Nền backup
             this.Load += UC_Message_Load;
 
@@ -83,9 +65,6 @@ namespace Do_an.Forms
             btnImage.Click += btnImage_Click;
             btnAttach.Click += btnAttach_Click;
             if (btnMenu != null) btnMenu.Click += (s, e) => OnMenuClicked?.Invoke();
-            if (btnVoiceCall != null) btnVoiceCall.Click += async (s, e) => await MakeCall("Voice");
-
-
 
             // Giữ lại Voice Call
             if (btnVoiceCall != null) btnVoiceCall.Click += async (s, e) => await MakeCall("Voice");
@@ -203,8 +182,6 @@ namespace Do_an.Forms
         private string GetTimeAgo(string s) { if (string.IsNullOrEmpty(s)) return "gần đây"; if (DateTime.TryParse(s, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime t)) { var d = DateTime.UtcNow - t; if (d.TotalMinutes < 1) return "vừa xong"; if (d.TotalMinutes < 60) return (int)d.TotalMinutes + " phút trước"; return (int)d.TotalDays + " ngày trước"; } return "gần đây"; }
 
         private async Task LoadChatList()
-        private async Task LoadChatList()
-            
         {
             if (!EnsureInitialized()) return;
             flChatList.Controls.Clear(); _idToUid.Clear(); _idToName.Clear(); _groupIds.Clear(); _chatPanels.Clear();
@@ -238,9 +215,6 @@ namespace Do_an.Forms
             GraphicsPath gp = new GraphicsPath(); gp.AddEllipse(0, 0, 14, 14); dot.Region = new Region(gp);
             if (!isGroup) p.Controls.Add(dot); dot.BringToFront();
 
-            p.Controls.Add(new Label { Text = name, Font = new Font("Segoe UI", 11, FontStyle.Bold), ForeColor = Color.NavajoWhite, Location = new Point(70, 15), AutoSize = true });
-            p.Controls.Add(new Label { Text = status, Font = new Font("Segoe UI", 9), ForeColor = (status == "Online" ? Color.LimeGreen : Color.Gray), Location = new Point(70, 40), AutoSize = true });
-
             // Text Color: White/Light Beige trên nền gỗ tối
             p.Controls.Add(new Label { Text = name, Font = new Font("Segoe UI", 11, FontStyle.Bold), ForeColor = Color.NavajoWhite, Location = new Point(70, 15), AutoSize = true });
             p.Controls.Add(new Label { Text = status, Font = new Font("Segoe UI", 9), ForeColor = (status == "Online" ? Color.LimeGreen : Color.Gray), Location = new Point(70, 40), AutoSize = true });
@@ -251,16 +225,12 @@ namespace Do_an.Forms
             p.Click += (s, e) => SwitchConversation(id, isGroup);
             flChatList.Controls.Add(p); return p;
         }
-        //------
 
         private async void SwitchConversation(string id, bool isGroup)
         {
             _currentChatId = id;
             _isGroupChat = isGroup;
 
-
-            string displayName = _idToName.ContainsKey(id) ? _idToName[id] : id;
-            lblChatName.Text = displayName;
             // Lấy tên hiển thị
             string displayName = _idToName.ContainsKey(id) ? _idToName[id] : id;
             lblChatName.Text = displayName;
@@ -321,7 +291,6 @@ namespace Do_an.Forms
                 {
                     if (_seenMessageIds[_currentChatId].Contains(item.Key)) continue;
 
-                    if (!_isGroupChat && item.Val.peerUid != targetUid) continue; 
                     if (!_isGroupChat && item.Val.peerUid != targetUid) continue; // Lọc tin nhắn theo UID
 
                     _seenMessageIds[id].Add(item.Key);
@@ -333,7 +302,6 @@ namespace Do_an.Forms
             catch { }
         }
 
-        //--------------
         private async Task MakeCall(string type)
         {
             if (string.IsNullOrEmpty(_currentChatId)) return;
@@ -362,7 +330,6 @@ namespace Do_an.Forms
         {
             if (string.IsNullOrEmpty(txtMessage.Text) || string.IsNullOrEmpty(_currentChatId)) return;
             string txt = txtMessage.Text.Trim();
-            txtMessage.Clear(); 
             txtMessage.Clear(); // Chỉ xóa text, không hiện local để tránh spam
 
             if (_isGroupChat) await _dbService.SendGroupMessageAsync(_currentChatId, CurrentUserUid, CurrentUserEmail, new FirebaseMessage { text = txt, timestamp = DateTime.UtcNow.ToString("o"), peerUid = CurrentUserUid, senderName = CurrentUserEmail });
@@ -371,7 +338,6 @@ namespace Do_an.Forms
             await CheckIncomingMessages();
         }
 
-        //------------
         private async Task SendPrivateMessage(string f, string t, string txt, string i, string fi, long sz, string fn = null)
         {
             string ts = DateTime.UtcNow.ToString("o");
@@ -429,7 +395,6 @@ namespace Do_an.Forms
             catch { }
         }
 
-        //----
         private void ResetRightPanel() { _currentChatId = null; lblChatName.Text = ""; flMessages.Controls.Clear(); }
         private void DisplayMessage(bool isMine, string t, string i, string f, string fn, long s, string uid)
         {
@@ -454,8 +419,6 @@ namespace Do_an.Forms
         }
         private void AddImageBubbleFromBase64(string str, bool m, bool s, string u) { try { using (var ms = new MemoryStream(Convert.FromBase64String(str))) { var img = Image.FromStream(ms); var p = new PictureBox { Image = (Image)img.Clone(), SizeMode = PictureBoxSizeMode.Zoom, Size = new Size(200, 200) }; var b = new Panel { AutoSize = true }; b.Controls.Add(p); AddRow(b, m, u); } } catch { } }
 
-        private void AddFileBubble(string n, long sz, bool m, bool s, string f, string u)
-        {
         // [FIX LỖI BẤM TẢI FILE]
         private void AddFileBubble(string n, long sz, bool m, bool s, string f, string u)
         {
@@ -487,8 +450,5 @@ namespace Do_an.Forms
         private void btnEmoji_Click(object s, EventArgs e) => _emojiMenu.Show(btnEmoji, 0, -100);
         private async void btnImage_Click(object s, EventArgs e) { if (_currentChatId == null) return; var o = new OpenFileDialog(); if (o.ShowDialog() == DialogResult.OK) { string b64 = Convert.ToBase64String(File.ReadAllBytes(o.FileName)); await SendPrivateMessage(CurrentUserUid, _idToUid[_currentChatId], null, b64, null, 0); await CheckIncomingMessages(); } }
         private async void btnAttach_Click(object s, EventArgs e) { if (_currentChatId == null) return; var o = new OpenFileDialog(); if (o.ShowDialog() == DialogResult.OK) { string b64 = Convert.ToBase64String(File.ReadAllBytes(o.FileName)); FileInfo f = new FileInfo(o.FileName); await SendPrivateMessage(CurrentUserUid, _idToUid[_currentChatId], null, null, b64, f.Length, f.Name); await CheckIncomingMessages(); } }
-    }
-}
-
     }
 }

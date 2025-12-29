@@ -30,8 +30,6 @@ namespace Do_an.Forms
         private FlowLayoutPanel _flpCategories;
         private bool _isLiveMode = false;
         private string _currentCategory = "All";
-
-        // --- DANH SÁCH ÂM THANH (MIXER) ---
         private List<WindowsMediaPlayer> _soundPlayers = new List<WindowsMediaPlayer>();
 
         // --- LINK SPOTIFY ---
