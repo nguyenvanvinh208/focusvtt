@@ -133,6 +133,16 @@ namespace Do_an.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] profile {
+            get {
+                object obj = ResourceManager.GetObject("profile", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] rank {
             get {
                 object obj = ResourceManager.GetObject("rank", resourceCulture);
