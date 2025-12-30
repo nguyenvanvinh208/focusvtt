@@ -215,7 +215,7 @@ namespace Do_an.Forms
         private PictureBox CreateControlButton(DrawIconDelegate drawFunc, EventHandler clickHandler, Color hoverColor)
         {
             PictureBox btn = new PictureBox() { Size = new Size(30, 30), SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.Transparent, Cursor = Cursors.Hand, Tag = drawFunc };
-            btn.Paint += (s, e) => { e.Graphics.SmoothingMode = SmoothingMode.AntiAlias; ((DrawIconDelegate)btn.Tag)(e.Graphics, e.ClipRectangle, Color.White); };
+            btn.Paint += (s, e) => { e.Graphics.SmoothingMode = SmoothingMode.AntiAlias; ((DrawIconDelegate)btn.Tag)(e.Graphics, e.ClipRectangle, Color.Black); };
             btn.MouseEnter += (s, e) => { btn.BackColor = hoverColor; btn.Invalidate(); };
             btn.MouseLeave += (s, e) => { btn.BackColor = Color.Transparent; btn.Invalidate(); };
             btn.Click += clickHandler; return btn;
