@@ -15,23 +15,28 @@ namespace Do_an.Services
         private IPEndPoint _remoteEndPoint;
         private bool _isListening = false;
 
+        // Cổng kết nối LAN
         private const int PORT = 11000;
 
         public VoiceService()
         {
             try
             {
+                // Cấu hình Loa
                 _waveOut = new WaveOutEvent();
                 _waveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1));
                 _waveProvider.DiscardOnBufferOverflow = true;
                 _waveOut.Init(_waveProvider);
                 _waveOut.Play();
+
+                // Cấu hình Mạng
                 _udpClient = new UdpClient();
                 _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, PORT));
             }
             catch (Exception ex)
             {
+                // Chỉ hiện lỗi nếu không thể khởi tạo phần cứng (loa hỏng)
                 MessageBox.Show("Lỗi Audio: " + ex.Message);
             }
         }
@@ -54,6 +59,7 @@ namespace Do_an.Services
             }
             catch
             {
+                // Lỗi kết nối âm thầm dừng lại, không hiện thông báo làm phiền người dùng
                 Stop();
             }
         }
