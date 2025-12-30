@@ -30,9 +30,9 @@ namespace Do_an.Forms
         private FlowLayoutPanel _flpCategories;
         private bool _isLiveMode = false;
         private string _currentCategory = "All";
+
         private List<WindowsMediaPlayer> _soundPlayers = new List<WindowsMediaPlayer>();
 
-        // --- LINK SPOTIFY ---
         private const string LINK_LOFI = "https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0";
         private const string LINK_CAFE = "https://open.spotify.com/embed/playlist/37i9dQZF1DX6VdMW310YC7?utm_source=generator&theme=0";
         private const string LINK_SONTUNG = "https://open.spotify.com/embed/artist/5dfZ5uSmzR7VQK0udbAVpf?utm_source=generator&theme=0";
@@ -42,7 +42,7 @@ namespace Do_an.Forms
         {
             InitializeComponent();
 
-            // Cấu hình Video nền
+    
             if (wmpBackground != null)
             {
                 try
@@ -57,7 +57,6 @@ namespace Do_an.Forms
                 catch { }
             }
 
-            // KHỞI TẠO MIXER
             InitializeSoundMixer();
 
             _currentTask = task;
@@ -76,22 +75,16 @@ namespace Do_an.Forms
             _timerLogic.Tick += TimerLogic_Tick;
             _timerLogic.Start();
         }
-
-        // --- [ĐÃ SỬA] LOGIC TÍNH ĐIỂM & ĐỒNG BỘ ---
         private async System.Threading.Tasks.Task CalculateAndSaveScore(TimeSpan duration)
         {
-            // 1. Tính toán
             int minutes = (int)duration.TotalMinutes;
-            if (minutes < 1) minutes = 1; // Tối thiểu 1 phút
+            if (minutes < 1) minutes = 1; 
 
             int xpEarned = minutes * 10;
             double hoursEarned = duration.TotalHours;
-
-            // 2. Cập nhật ngay vào biến User trên máy (Local)
             _currentUser.Info.XP += xpEarned;
             _currentUser.Info.TotalHours += hoursEarned;
 
-            // Logic lên cấp local
             while (_currentUser.Info.XP >= _currentUser.Info.XPToNextLevel)
             {
                 _currentUser.Info.XP -= _currentUser.Info.XPToNextLevel;
@@ -102,10 +95,9 @@ namespace Do_an.Forms
 
             try
             {
-                // 3. Gửi lên Server lưu trữ
+ 
                 await _dbService.AddXpAndLevelUpAsync(_currentUser.Uid, xpEarned, hoursEarned);
 
-                // [MỚI] Hiển thị thông báo thời gian dạng HH:mm:ss
                 string timeStr = $"{(int)duration.TotalHours:00}:{duration.Minutes:00}:{duration.Seconds:00}";
 
                 MessageBox.Show($"Hoàn thành phiên làm việc!\n\n+{xpEarned} XP\nThời gian học: {timeStr}",
@@ -120,7 +112,6 @@ namespace Do_an.Forms
             this.Close();
         }
 
-        // --- CÁC HÀM KHÁC GIỮ NGUYÊN ---
         private void InitializeSoundMixer()
         {
             string baseUrl = "https://raw.githubusercontent.com/nguyenvanvinh208/FocusVTT-Data/main/";
@@ -216,19 +207,15 @@ namespace Do_an.Forms
         private void UpdateDockButtonColors() { btnScenes.ForeColor = Color.FromArgb(64, 64, 64); btnSounds.ForeColor = Color.FromArgb(64, 64, 64); btnMusic.ForeColor = Color.FromArgb(64, 64, 64); if (pnlScenes.Visible) btnScenes.ForeColor = Color.OrangeRed; if (pnlSounds.Visible) btnSounds.ForeColor = Color.OrangeRed; if (pnlSpotify.Visible) btnMusic.ForeColor = Color.FromArgb(29, 185, 84); }
         private void BtnToggleTimer_Click(object sender, EventArgs e) { lblTimer.Visible = !lblTimer.Visible; if (lblTimer.Visible) btnToggleTimer.ForeColor = Color.FromArgb(64, 64, 64); else btnToggleTimer.ForeColor = Color.OrangeRed; }
 
-        // [QUAN TRỌNG] HÀM CĂN CHỈNH VỊ TRÍ
         private void CenterControls()
         {
-            // 1. Căn giữa Đồng hồ
             if (lblTimer != null)
                 lblTimer.Location = new Point((this.Width - lblTimer.Width) / 2, (this.Height - lblTimer.Height) / 2);
 
-            // 2. [ĐÃ SỬA] Đẩy nút thu nhỏ sát góc phải
-            // this.ClientSize.Width lấy chiều rộng thực tế khi Form đang chạy (Maximized)
             if (lblMin != null)
             {
                 lblMin.Location = new Point(this.ClientSize.Width - 60, 0);
-                lblMin.BringToFront(); // Đảm bảo nút nằm trên cùng
+                lblMin.BringToFront(); 
             }
         }
 
@@ -240,7 +227,6 @@ namespace Do_an.Forms
 
             lblTimer.Text = remaining.TotalSeconds > 0 ? $"{remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}" : "00:00:00";
 
-            // Gọi hàm căn chỉnh liên tục để đảm bảo vị trí đúng
             CenterControls();
 
             if (now >= _scheduledEndTime)

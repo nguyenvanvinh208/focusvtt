@@ -1,14 +1,13 @@
-﻿using Do_an.Models;
-using Firebase.Database;
+﻿using Firebase.Database;
 using Firebase.Database.Query;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
+using Do_an.Models;
+using Newtonsoft.Json;
+using System.Text;
+using System.Net.Http;
 
 namespace Do_an.Firebase
 {
@@ -372,40 +371,6 @@ namespace Do_an.Firebase
             catch { return new List<TaskInfo>(); }
         }
 
-        public async Task UpdateTaskStatusAsync(string uid, DateTime date, string taskId, bool isDone)
-        {
-            try
-            {
-                string dateStr = date.ToString("yyyy-MM-dd");
-                await _firebaseClient.Child("Schedules").Child(uid).Child(dateStr).Child(taskId).Child("IsDone").PutAsync(isDone);
-            }
-            catch { }
-        }
-
-        //Hàm AddTaskAsync 
-        public async Task AddTaskAsync(string uid, DateTime date, TaskInfo task)
-        {
-            try
-            {
-                string dateStr = date.ToString("yyyy-MM-dd");
-                var result = await _firebaseClient.Child("Schedules").Child(uid).Child(dateStr).PostAsync(task);
-                task.Id = result.Key;
-                await _firebaseClient.Child("Schedules").Child(uid).Child(dateStr).Child(task.Id).PutAsync(task);
-            }
-            catch (Exception ex) { throw new Exception("Lỗi lưu lịch: " + ex.Message); }
-        }
-        //Ham GetTasksByDateAsync
-        public async Task<List<TaskInfo>> GetTasksByDateAsync(string uid, DateTime date)
-        {
-            try
-            {
-                string dateStr = date.ToString("yyyy-MM-dd");
-                var items = await _firebaseClient.Child("Schedules").Child(uid).Child(dateStr).OnceAsync<TaskInfo>();
-                return items.Select(i => i.Object).ToList();
-            }
-            catch { return new List<TaskInfo>(); }
-        }
-        //Ham UpdateTaskStatusAsync
         public async Task UpdateTaskStatusAsync(string uid, DateTime date, string taskId, bool isDone)
         {
             try

@@ -35,7 +35,6 @@ namespace Do_an.Forms
             MakeRound(btnPrev);
             MakeRound(btnNext);
 
-            // Tìm nút menu (vẫn hoạt động tốt dù menu đã nằm trong picturebox)
             Control menu = this.Controls.Find("lblMenu", true).Length > 0 ? this.Controls.Find("lblMenu", true)[0] : null;
             if (menu != null) menu.Click += (s, ev) => OnMenuClicked?.Invoke();
 
@@ -44,8 +43,6 @@ namespace Do_an.Forms
 
         private void LoadSlideData()
         {
-            // Đảm bảo bạn có Resources tương ứng (schedule, rank, message)
-            // Nếu chưa có, hãy thêm ảnh vào Project -> Properties -> Resources
             try
             {
                 _slides.Add(new SlideData
@@ -74,7 +71,6 @@ namespace Do_an.Forms
             }
             catch (Exception ex)
             {
-                // Xử lý nếu thiếu resource để không crash
                 MessageBox.Show("Vui lòng kiểm tra lại file Resources ảnh: " + ex.Message);
             }
         }

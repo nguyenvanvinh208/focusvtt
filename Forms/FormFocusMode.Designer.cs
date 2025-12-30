@@ -48,245 +48,333 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormFocusMode));
-            this.lblMin = new System.Windows.Forms.Label();
-            this.lblTimer = new System.Windows.Forms.Label();
-            this.pnlBottomDock = new System.Windows.Forms.Panel();
-            this.btnScenes = new System.Windows.Forms.Button();
-            this.btnMusic = new System.Windows.Forms.Button();
-            this.btnSounds = new System.Windows.Forms.Button();
-            this.btnToggleTimer = new System.Windows.Forms.Button();
-            this.btnFinish = new System.Windows.Forms.Button();
-            this.pnlScenes = new System.Windows.Forms.Panel();
-            this.lblTitleScenes = new System.Windows.Forms.Label();
-            this.pnlTabs = new System.Windows.Forms.Panel();
-            this.btnTabStatic = new System.Windows.Forms.Button();
-            this.btnTabLive = new System.Windows.Forms.Button();
-            this.pnlSounds = new System.Windows.Forms.Panel();
-            this.lblTitleSounds = new System.Windows.Forms.Label();
-            this.flpMixer = new System.Windows.Forms.FlowLayoutPanel();
-            this.wmpBackground = new AxWMPLib.AxWindowsMediaPlayer();
-            this.pnlSpotify = new System.Windows.Forms.Panel();
-            this.webViewSpotify = new Microsoft.Web.WebView2.WinForms.WebView2();
-            this.flpMusicMenu = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnMusicLofi = new System.Windows.Forms.Button();
-            this.btnMusicCafe = new System.Windows.Forms.Button();
-            this.btnMusicMTP = new System.Windows.Forms.Button();
-            this.btnMusicDJ = new System.Windows.Forms.Button();
-
-            this.pnlBottomDock.SuspendLayout();
-            this.pnlScenes.SuspendLayout();
-            this.pnlTabs.SuspendLayout();
-            this.pnlSounds.SuspendLayout();
-            this.pnlSpotify.SuspendLayout();
-            this.flpMusicMenu.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.wmpBackground)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.webViewSpotify)).BeginInit();
-            this.SuspendLayout();
-
+            lblMin = new Label();
+            lblTimer = new Label();
+            pnlBottomDock = new Panel();
+            btnScenes = new Button();
+            btnMusic = new Button();
+            btnSounds = new Button();
+            btnToggleTimer = new Button();
+            btnFinish = new Button();
+            pnlScenes = new Panel();
+            pnlTabs = new Panel();
+            btnTabStatic = new Button();
+            btnTabLive = new Button();
+            lblTitleScenes = new Label();
+            pnlSounds = new Panel();
+            flpMixer = new FlowLayoutPanel();
+            lblTitleSounds = new Label();
+            wmpBackground = new AxWMPLib.AxWindowsMediaPlayer();
+            pnlSpotify = new Panel();
+            webViewSpotify = new Microsoft.Web.WebView2.WinForms.WebView2();
+            flpMusicMenu = new FlowLayoutPanel();
+            btnMusicLofi = new Button();
+            btnMusicCafe = new Button();
+            btnMusicMTP = new Button();
+            btnMusicDJ = new Button();
+            pnlBottomDock.SuspendLayout();
+            pnlScenes.SuspendLayout();
+            pnlTabs.SuspendLayout();
+            pnlSounds.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)wmpBackground).BeginInit();
+            pnlSpotify.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)webViewSpotify).BeginInit();
+            flpMusicMenu.SuspendLayout();
+            SuspendLayout();
             // 
             // lblMin
             // 
-            this.lblMin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblMin.AutoSize = true;
-            this.lblMin.BackColor = System.Drawing.Color.Transparent;
-            this.lblMin.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.lblMin.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Bold);
-            this.lblMin.ForeColor = System.Drawing.Color.White;
-            // [ĐÃ SỬA] Đặt sát góc phải (1165) và sát mép trên (0)
-            this.lblMin.Location = new System.Drawing.Point(1165, 0);
-            this.lblMin.Name = "lblMin";
-            this.lblMin.Size = new System.Drawing.Size(35, 46);
-            this.lblMin.TabIndex = 10;
-            this.lblMin.Text = "_";
-            this.lblMin.Click += new System.EventHandler(this.LblMin_Click);
-
+            lblMin.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblMin.AutoSize = true;
+            lblMin.BackColor = Color.Transparent;
+            lblMin.Cursor = Cursors.Hand;
+            lblMin.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            lblMin.ForeColor = Color.White;
+            lblMin.Location = new Point(1165, 0);
+            lblMin.Name = "lblMin";
+            lblMin.Size = new Size(34, 46);
+            lblMin.TabIndex = 10;
+            lblMin.Text = "_";
+            lblMin.Click += LblMin_Click;
             // 
             // lblTimer
             // 
-            this.lblTimer.AutoSize = true;
-            this.lblTimer.BackColor = System.Drawing.Color.Transparent;
-            this.lblTimer.Font = new System.Drawing.Font("Segoe UI", 72F, System.Drawing.FontStyle.Bold);
-            this.lblTimer.ForeColor = System.Drawing.Color.White;
-            this.lblTimer.Location = new System.Drawing.Point(300, 200);
-            this.lblTimer.Name = "lblTimer";
-            this.lblTimer.Size = new System.Drawing.Size(554, 159);
-            this.lblTimer.TabIndex = 1;
-            this.lblTimer.Text = "00:00:00";
-            this.lblTimer.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-
+            lblTimer.AutoSize = true;
+            lblTimer.BackColor = Color.Transparent;
+            lblTimer.Font = new Font("Segoe UI", 72F, FontStyle.Bold);
+            lblTimer.ForeColor = Color.White;
+            lblTimer.Location = new Point(300, 200);
+            lblTimer.Name = "lblTimer";
+            lblTimer.Size = new Size(547, 159);
+            lblTimer.TabIndex = 1;
+            lblTimer.Text = "00:00:00";
+            lblTimer.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // pnlBottomDock
             // 
-            this.pnlBottomDock.BackColor = System.Drawing.Color.Transparent;
-            this.pnlBottomDock.Controls.Add(this.btnScenes);
-            this.pnlBottomDock.Controls.Add(this.btnMusic);
-            this.pnlBottomDock.Controls.Add(this.btnSounds);
-            this.pnlBottomDock.Controls.Add(this.btnToggleTimer);
-            this.pnlBottomDock.Controls.Add(this.btnFinish);
-            this.pnlBottomDock.Location = new System.Drawing.Point(250, 600);
-            this.pnlBottomDock.Name = "pnlBottomDock";
-            this.pnlBottomDock.Size = new System.Drawing.Size(700, 80);
-            this.pnlBottomDock.TabIndex = 5;
-            this.pnlBottomDock.Paint += new System.Windows.Forms.PaintEventHandler(this.PnlCommon_Paint);
-
-            // Buttons
-            this.btnScenes.Name = "btnScenes"; this.btnScenes.Size = new System.Drawing.Size(100, 60);
-            this.btnMusic.Name = "btnMusic"; this.btnMusic.Size = new System.Drawing.Size(100, 60);
-            this.btnSounds.Name = "btnSounds"; this.btnSounds.Size = new System.Drawing.Size(100, 60);
-            this.btnToggleTimer.Name = "btnToggleTimer"; this.btnToggleTimer.Size = new System.Drawing.Size(100, 60);
-            this.btnFinish.Name = "btnFinish"; this.btnFinish.Size = new System.Drawing.Size(100, 60);
-
+            pnlBottomDock.BackColor = Color.Transparent;
+            pnlBottomDock.Controls.Add(btnScenes);
+            pnlBottomDock.Controls.Add(btnMusic);
+            pnlBottomDock.Controls.Add(btnSounds);
+            pnlBottomDock.Controls.Add(btnToggleTimer);
+            pnlBottomDock.Controls.Add(btnFinish);
+            pnlBottomDock.Location = new Point(250, 600);
+            pnlBottomDock.Name = "pnlBottomDock";
+            pnlBottomDock.Size = new Size(700, 80);
+            pnlBottomDock.TabIndex = 5;
+            pnlBottomDock.Paint += PnlCommon_Paint;
+            // 
+            // btnScenes
+            // 
+            btnScenes.Location = new Point(0, 0);
+            btnScenes.Name = "btnScenes";
+            btnScenes.Size = new Size(100, 60);
+            btnScenes.TabIndex = 0;
+            // 
+            // btnMusic
+            // 
+            btnMusic.Location = new Point(0, 0);
+            btnMusic.Name = "btnMusic";
+            btnMusic.Size = new Size(100, 60);
+            btnMusic.TabIndex = 1;
+            // 
+            // btnSounds
+            // 
+            btnSounds.Location = new Point(0, 0);
+            btnSounds.Name = "btnSounds";
+            btnSounds.Size = new Size(100, 60);
+            btnSounds.TabIndex = 2;
+            // 
+            // btnToggleTimer
+            // 
+            btnToggleTimer.Location = new Point(0, 0);
+            btnToggleTimer.Name = "btnToggleTimer";
+            btnToggleTimer.Size = new Size(100, 60);
+            btnToggleTimer.TabIndex = 3;
+            // 
+            // btnFinish
+            // 
+            btnFinish.Location = new Point(0, 0);
+            btnFinish.Name = "btnFinish";
+            btnFinish.Size = new Size(100, 60);
+            btnFinish.TabIndex = 4;
             // 
             // pnlScenes
             // 
-            this.pnlScenes.BackColor = System.Drawing.Color.Transparent;
-            this.pnlScenes.Controls.Add(this.pnlTabs);
-            this.pnlScenes.Controls.Add(this.lblTitleScenes);
-            this.pnlScenes.Location = new System.Drawing.Point(100, 100);
-            this.pnlScenes.Name = "pnlScenes";
-            this.pnlScenes.Size = new System.Drawing.Size(800, 500);
-            this.pnlScenes.TabIndex = 6;
-            this.pnlScenes.Visible = false;
-            this.pnlScenes.Paint += new System.Windows.Forms.PaintEventHandler(this.PnlCommon_Paint);
-
-            // lblTitleScenes
-            this.lblTitleScenes.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblTitleScenes.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
-            this.lblTitleScenes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.lblTitleScenes.Location = new System.Drawing.Point(0, 0);
-            this.lblTitleScenes.Name = "lblTitleScenes";
-            this.lblTitleScenes.Size = new System.Drawing.Size(800, 50);
-            this.lblTitleScenes.TabIndex = 0;
-            this.lblTitleScenes.Text = "Themes Collection";
-            this.lblTitleScenes.Padding = new System.Windows.Forms.Padding(20, 10, 0, 0);
-
+            pnlScenes.BackColor = Color.Transparent;
+            pnlScenes.Controls.Add(pnlTabs);
+            pnlScenes.Controls.Add(lblTitleScenes);
+            pnlScenes.Location = new Point(100, 100);
+            pnlScenes.Name = "pnlScenes";
+            pnlScenes.Size = new Size(800, 500);
+            pnlScenes.TabIndex = 6;
+            pnlScenes.Visible = false;
+            pnlScenes.Paint += PnlCommon_Paint;
+            // 
             // pnlTabs
-            this.pnlTabs.BackColor = System.Drawing.Color.Transparent;
-            this.pnlTabs.Controls.Add(this.btnTabStatic);
-            this.pnlTabs.Controls.Add(this.btnTabLive);
-            this.pnlTabs.Location = new System.Drawing.Point(300, 15);
-            this.pnlTabs.Name = "pnlTabs";
-            this.pnlTabs.Size = new System.Drawing.Size(300, 40);
-            this.pnlTabs.TabIndex = 1;
-
-            // Tab Buttons
-            this.btnTabStatic.Dock = System.Windows.Forms.DockStyle.Left; this.btnTabStatic.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnTabStatic.FlatAppearance.BorderSize = 0; this.btnTabStatic.Text = "🖼️ Static Themes"; this.btnTabStatic.Size = new System.Drawing.Size(140, 40);
-            this.btnTabLive.Dock = System.Windows.Forms.DockStyle.Right; this.btnTabLive.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnTabLive.FlatAppearance.BorderSize = 0; this.btnTabLive.Text = "▶️ Live Themes"; this.btnTabLive.Size = new System.Drawing.Size(140, 40);
-
+            // 
+            pnlTabs.BackColor = Color.Transparent;
+            pnlTabs.Controls.Add(btnTabStatic);
+            pnlTabs.Controls.Add(btnTabLive);
+            pnlTabs.Location = new Point(300, 15);
+            pnlTabs.Name = "pnlTabs";
+            pnlTabs.Size = new Size(300, 40);
+            pnlTabs.TabIndex = 1;
+            // 
+            // btnTabStatic
+            // 
+            btnTabStatic.Dock = DockStyle.Left;
+            btnTabStatic.FlatAppearance.BorderSize = 0;
+            btnTabStatic.FlatStyle = FlatStyle.Flat;
+            btnTabStatic.Location = new Point(0, 0);
+            btnTabStatic.Name = "btnTabStatic";
+            btnTabStatic.Size = new Size(140, 40);
+            btnTabStatic.TabIndex = 0;
+            btnTabStatic.Text = "🖼️ Static Themes";
+            // 
+            // btnTabLive
+            // 
+            btnTabLive.Dock = DockStyle.Right;
+            btnTabLive.FlatAppearance.BorderSize = 0;
+            btnTabLive.FlatStyle = FlatStyle.Flat;
+            btnTabLive.Location = new Point(160, 0);
+            btnTabLive.Name = "btnTabLive";
+            btnTabLive.Size = new Size(140, 40);
+            btnTabLive.TabIndex = 1;
+            btnTabLive.Text = "▶️ Live Themes";
+            // 
+            // lblTitleScenes
+            // 
+            lblTitleScenes.Dock = DockStyle.Top;
+            lblTitleScenes.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            lblTitleScenes.ForeColor = Color.FromArgb(64, 64, 64);
+            lblTitleScenes.Location = new Point(0, 0);
+            lblTitleScenes.Name = "lblTitleScenes";
+            lblTitleScenes.Padding = new Padding(20, 10, 0, 0);
+            lblTitleScenes.Size = new Size(800, 50);
+            lblTitleScenes.TabIndex = 0;
+            lblTitleScenes.Text = "Themes Collection";
             // 
             // pnlSounds
             // 
-            this.pnlSounds.BackColor = System.Drawing.Color.Transparent;
-            this.pnlSounds.Controls.Add(this.flpMixer);
-            this.pnlSounds.Controls.Add(this.lblTitleSounds);
-            this.pnlSounds.Location = new System.Drawing.Point(400, 100);
-            this.pnlSounds.Name = "pnlSounds";
-            this.pnlSounds.Size = new System.Drawing.Size(350, 350);
-            this.pnlSounds.TabIndex = 7;
-            this.pnlSounds.Visible = false;
-            this.pnlSounds.Paint += new System.Windows.Forms.PaintEventHandler(this.PnlCommon_Paint);
-
-            // lblTitleSounds
-            this.lblTitleSounds.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblTitleSounds.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblTitleSounds.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.lblTitleSounds.Location = new System.Drawing.Point(0, 0);
-            this.lblTitleSounds.Name = "lblTitleSounds";
-            this.lblTitleSounds.Size = new System.Drawing.Size(350, 40);
-            this.lblTitleSounds.TabIndex = 0;
-            this.lblTitleSounds.Text = "Nature Mixer";
-            this.lblTitleSounds.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-
+            pnlSounds.BackColor = Color.Transparent;
+            pnlSounds.Controls.Add(flpMixer);
+            pnlSounds.Controls.Add(lblTitleSounds);
+            pnlSounds.Location = new Point(400, 100);
+            pnlSounds.Name = "pnlSounds";
+            pnlSounds.Size = new Size(350, 350);
+            pnlSounds.TabIndex = 7;
+            pnlSounds.Visible = false;
+            pnlSounds.Paint += PnlCommon_Paint;
+            // 
             // flpMixer
-            this.flpMixer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flpMixer.BackColor = System.Drawing.Color.Transparent;
-            this.flpMixer.AutoScroll = true;
-            this.flpMixer.Location = new System.Drawing.Point(0, 40);
-            this.flpMixer.Name = "flpMixer";
-            this.flpMixer.Size = new System.Drawing.Size(350, 310);
-            this.flpMixer.Padding = new System.Windows.Forms.Padding(20, 10, 0, 0);
-
+            // 
+            flpMixer.AutoScroll = true;
+            flpMixer.BackColor = Color.Transparent;
+            flpMixer.Dock = DockStyle.Fill;
+            flpMixer.Location = new Point(0, 40);
+            flpMixer.Name = "flpMixer";
+            flpMixer.Padding = new Padding(20, 10, 0, 0);
+            flpMixer.Size = new Size(350, 310);
+            flpMixer.TabIndex = 0;
+            // 
+            // lblTitleSounds
+            // 
+            lblTitleSounds.Dock = DockStyle.Top;
+            lblTitleSounds.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblTitleSounds.ForeColor = Color.FromArgb(64, 64, 64);
+            lblTitleSounds.Location = new Point(0, 0);
+            lblTitleSounds.Name = "lblTitleSounds";
+            lblTitleSounds.Size = new Size(350, 40);
+            lblTitleSounds.TabIndex = 0;
+            lblTitleSounds.Text = "Nature Mixer";
+            lblTitleSounds.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // wmpBackground
+            // 
+            wmpBackground.Dock = DockStyle.Fill;
+            wmpBackground.Enabled = true;
+            wmpBackground.Location = new Point(0, 0);
+            wmpBackground.Name = "wmpBackground";
+            wmpBackground.OcxState = (AxHost.State)resources.GetObject("wmpBackground.OcxState");
+            wmpBackground.Size = new Size(1200, 800);
+            wmpBackground.TabIndex = 0;
             // 
             // pnlSpotify
             // 
-            this.pnlSpotify.BackColor = System.Drawing.Color.Transparent;
-            this.pnlSpotify.Controls.Add(this.webViewSpotify);
-            this.pnlSpotify.Controls.Add(this.flpMusicMenu);
-            this.pnlSpotify.Location = new System.Drawing.Point(600, 100);
-            this.pnlSpotify.Name = "pnlSpotify";
-            this.pnlSpotify.Size = new System.Drawing.Size(580, 400);
-            this.pnlSpotify.TabIndex = 8;
-            this.pnlSpotify.Visible = false;
-            this.pnlSpotify.Paint += new System.Windows.Forms.PaintEventHandler(this.PnlSpotify_Paint);
-
-            // flpMusicMenu
-            this.flpMusicMenu.Dock = System.Windows.Forms.DockStyle.Top;
-            this.flpMusicMenu.BackColor = System.Drawing.Color.Transparent;
-            this.flpMusicMenu.Controls.Add(this.btnMusicLofi);
-            this.flpMusicMenu.Controls.Add(this.btnMusicCafe);
-            this.flpMusicMenu.Controls.Add(this.btnMusicMTP);
-            this.flpMusicMenu.Controls.Add(this.btnMusicDJ);
-            this.flpMusicMenu.Location = new System.Drawing.Point(0, 0);
-            this.flpMusicMenu.Name = "flpMusicMenu";
-            this.flpMusicMenu.Size = new System.Drawing.Size(580, 60);
-            this.flpMusicMenu.Padding = new System.Windows.Forms.Padding(30, 12, 0, 0);
-
-            // Music Buttons
-            this.btnMusicLofi.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnMusicLofi.FlatAppearance.BorderSize = 0; this.btnMusicLofi.Size = new System.Drawing.Size(100, 35); this.btnMusicLofi.Text = "🎧 Lofi"; this.btnMusicLofi.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnMusicCafe.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnMusicCafe.FlatAppearance.BorderSize = 0; this.btnMusicCafe.Size = new System.Drawing.Size(100, 35); this.btnMusicCafe.Text = "☕ Cafe"; this.btnMusicCafe.Cursor = System.Windows.Forms.Cursors.Hand; this.btnMusicCafe.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
-            this.btnMusicMTP.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnMusicMTP.FlatAppearance.BorderSize = 0; this.btnMusicMTP.Size = new System.Drawing.Size(110, 35); this.btnMusicMTP.Text = "🎤 Sơn Tùng"; this.btnMusicMTP.Cursor = System.Windows.Forms.Cursors.Hand; this.btnMusicMTP.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
-            this.btnMusicDJ.FlatStyle = System.Windows.Forms.FlatStyle.Flat; this.btnMusicDJ.FlatAppearance.BorderSize = 0; this.btnMusicDJ.Size = new System.Drawing.Size(100, 35); this.btnMusicDJ.Text = "🔥 DJ"; this.btnMusicDJ.Cursor = System.Windows.Forms.Cursors.Hand; this.btnMusicDJ.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
-
+            pnlSpotify.BackColor = Color.Transparent;
+            pnlSpotify.Controls.Add(webViewSpotify);
+            pnlSpotify.Controls.Add(flpMusicMenu);
+            pnlSpotify.Location = new Point(600, 100);
+            pnlSpotify.Name = "pnlSpotify";
+            pnlSpotify.Size = new Size(580, 400);
+            pnlSpotify.TabIndex = 8;
+            pnlSpotify.Visible = false;
+            pnlSpotify.Paint += PnlSpotify_Paint;
+            // 
             // webViewSpotify
-            this.webViewSpotify.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webViewSpotify.Location = new System.Drawing.Point(0, 60);
-            this.webViewSpotify.Name = "webViewSpotify";
-            this.webViewSpotify.Size = new System.Drawing.Size(580, 340);
-            this.webViewSpotify.TabIndex = 1;
-            this.webViewSpotify.ZoomFactor = 0.9D;
-            this.webViewSpotify.DefaultBackgroundColor = System.Drawing.Color.FromArgb(30, 30, 30);
-
-            // wmpBackground
-            this.wmpBackground.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.wmpBackground.Enabled = true;
-            this.wmpBackground.Location = new System.Drawing.Point(0, 0);
-            this.wmpBackground.Name = "wmpBackground";
-            this.wmpBackground.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("wmpBackground.OcxState")));
-            this.wmpBackground.Size = new System.Drawing.Size(1200, 800);
-            this.wmpBackground.TabIndex = 0;
-
+            // 
+            webViewSpotify.AllowExternalDrop = true;
+            webViewSpotify.CreationProperties = null;
+            webViewSpotify.DefaultBackgroundColor = Color.FromArgb(30, 30, 30);
+            webViewSpotify.Dock = DockStyle.Fill;
+            webViewSpotify.Location = new Point(0, 60);
+            webViewSpotify.Name = "webViewSpotify";
+            webViewSpotify.Size = new Size(580, 340);
+            webViewSpotify.TabIndex = 1;
+            webViewSpotify.ZoomFactor = 0.9D;
+            // 
+            // flpMusicMenu
+            // 
+            flpMusicMenu.BackColor = Color.Transparent;
+            flpMusicMenu.Controls.Add(btnMusicLofi);
+            flpMusicMenu.Controls.Add(btnMusicCafe);
+            flpMusicMenu.Controls.Add(btnMusicMTP);
+            flpMusicMenu.Controls.Add(btnMusicDJ);
+            flpMusicMenu.Dock = DockStyle.Top;
+            flpMusicMenu.Location = new Point(0, 0);
+            flpMusicMenu.Name = "flpMusicMenu";
+            flpMusicMenu.Padding = new Padding(30, 12, 0, 0);
+            flpMusicMenu.Size = new Size(580, 60);
+            flpMusicMenu.TabIndex = 2;
+            // 
+            // btnMusicLofi
+            // 
+            btnMusicLofi.Cursor = Cursors.Hand;
+            btnMusicLofi.FlatAppearance.BorderSize = 0;
+            btnMusicLofi.FlatStyle = FlatStyle.Flat;
+            btnMusicLofi.Location = new Point(33, 15);
+            btnMusicLofi.Name = "btnMusicLofi";
+            btnMusicLofi.Size = new Size(100, 35);
+            btnMusicLofi.TabIndex = 0;
+            btnMusicLofi.Text = "🎧 Lofi";
+            // 
+            // btnMusicCafe
+            // 
+            btnMusicCafe.Cursor = Cursors.Hand;
+            btnMusicCafe.FlatAppearance.BorderSize = 0;
+            btnMusicCafe.FlatStyle = FlatStyle.Flat;
+            btnMusicCafe.Location = new Point(146, 15);
+            btnMusicCafe.Margin = new Padding(10, 3, 3, 3);
+            btnMusicCafe.Name = "btnMusicCafe";
+            btnMusicCafe.Size = new Size(100, 35);
+            btnMusicCafe.TabIndex = 1;
+            btnMusicCafe.Text = "☕ Cafe";
+            // 
+            // btnMusicMTP
+            // 
+            btnMusicMTP.Cursor = Cursors.Hand;
+            btnMusicMTP.FlatAppearance.BorderSize = 0;
+            btnMusicMTP.FlatStyle = FlatStyle.Flat;
+            btnMusicMTP.Location = new Point(259, 15);
+            btnMusicMTP.Margin = new Padding(10, 3, 3, 3);
+            btnMusicMTP.Name = "btnMusicMTP";
+            btnMusicMTP.Size = new Size(110, 35);
+            btnMusicMTP.TabIndex = 2;
+            btnMusicMTP.Text = "🎤 Sơn Tùng";
+            // 
+            // btnMusicDJ
+            // 
+            btnMusicDJ.Cursor = Cursors.Hand;
+            btnMusicDJ.FlatAppearance.BorderSize = 0;
+            btnMusicDJ.FlatStyle = FlatStyle.Flat;
+            btnMusicDJ.Location = new Point(382, 15);
+            btnMusicDJ.Margin = new Padding(10, 3, 3, 3);
+            btnMusicDJ.Name = "btnMusicDJ";
+            btnMusicDJ.Size = new Size(100, 35);
+            btnMusicDJ.TabIndex = 3;
+            btnMusicDJ.Text = "🔥 DJ";
+            // 
             // FormFocusMode
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.Black;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(1200, 800);
-
-            this.Controls.Add(this.pnlSpotify);
-            this.Controls.Add(this.pnlSounds);
-            this.Controls.Add(this.pnlScenes);
-            this.Controls.Add(this.pnlBottomDock);
-            this.Controls.Add(this.lblTimer);
-            this.Controls.Add(this.lblMin);
-            this.Controls.Add(this.wmpBackground);
-
-            this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "FormFocusMode";
-            this.Text = "FormFocusMode";
-            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            this.Load += new System.EventHandler(this.FormFocusMode_Load);
-
-            this.pnlBottomDock.ResumeLayout(false);
-            this.pnlScenes.ResumeLayout(false);
-            this.pnlTabs.ResumeLayout(false);
-            this.pnlSounds.ResumeLayout(false);
-            this.pnlSpotify.ResumeLayout(false);
-            this.flpMusicMenu.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.wmpBackground)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.webViewSpotify)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.Black;
+            BackgroundImageLayout = ImageLayout.Stretch;
+            ClientSize = new Size(1200, 800);
+            Controls.Add(pnlSpotify);
+            Controls.Add(pnlSounds);
+            Controls.Add(pnlScenes);
+            Controls.Add(pnlBottomDock);
+            Controls.Add(lblTimer);
+            Controls.Add(lblMin);
+            Controls.Add(wmpBackground);
+            DoubleBuffered = true;
+            FormBorderStyle = FormBorderStyle.None;
+            Name = "FormFocusMode";
+            Text = "FormFocusMode";
+            WindowState = FormWindowState.Maximized;
+            Load += FormFocusMode_Load;
+            pnlBottomDock.ResumeLayout(false);
+            pnlScenes.ResumeLayout(false);
+            pnlTabs.ResumeLayout(false);
+            pnlSounds.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)wmpBackground).EndInit();
+            pnlSpotify.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)webViewSpotify).EndInit();
+            flpMusicMenu.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
     }
 }

@@ -25,8 +25,6 @@ namespace Do_an.Forms
         {
             ThemeData = theme;
 
-            // [ĐÃ SỬA LỖI TẠI ĐÂY]
-            // Dùng ThumbnailImg thay vì Thumbnail
             _image = theme.ThumbnailImg;
 
             _title = theme.Title;

@@ -27,8 +27,6 @@ namespace Do_an.Forms
 
             this.Size = new Size(900, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
-
-            // Tạo Label Bio nếu chưa có trong Designer
             if (lblBio == null)
             {
                 lblBio = new Label();
@@ -38,26 +36,21 @@ namespace Do_an.Forms
                 this.Controls.Add(lblBio);
             }
 
-            // Setup giao diện ban đầu
             LoadDataToUI();
             ApplyCustomLayout();
             SetupStatsPanel();
             SetupEditPanel();
 
-            // [QUAN TRỌNG] Lấy dữ liệu MỚI NHẤT từ Server
             _ = RefreshDataFromServer();
         }
 
-        // --- HÀM LẤY DỮ LIỆU TỪ SERVER (REALTIME) ---
         private async Task RefreshDataFromServer()
         {
             try
             {
-                // 1. [QUAN TRỌNG] Gọi hàm tính toán Streak trên Server trước
-                // Để đảm bảo nếu hôm nay vừa đăng nhập thì Streak sẽ tăng lên 1
                 await _dbService.CheckAndUpdateStreakAsync(_user.Uid);
 
-                // 2. Tải thông tin User mới nhất về
+
                 var latestUser = await _dbService.GetUserAsync(_user.Uid);
 
                 if (latestUser != null)
@@ -66,22 +59,20 @@ namespace Do_an.Forms
                     _user.Info = latestUser.Info ?? new UserProfile();
                 }
 
-                // 3. Cập nhật lên màn hình
                 if (!this.IsDisposed && this.IsHandleCreated)
                 {
                     this.Invoke((MethodInvoker)delegate
                     {
                         LoadDataToUI();
-                        SetupStatsPanel();   // Vẽ lại thẻ với dữ liệu mới
+                        SetupStatsPanel();   
                         SetupEditPanel();
                         ApplyCustomLayout();
                     });
                 }
             }
-            catch { /* Bỏ qua lỗi mạng */ }
+            catch {}
         }
 
-        // --- SETUP CÁC THẺ THỐNG KÊ (PROFILE) ---
         private void SetupStatsPanel()
         {
             pnlStats.Controls.Clear();
@@ -92,32 +83,29 @@ namespace Do_an.Forms
             int cardWidth = (totalWidth - totalGap) / 3;
             int cardHeight = pnlStats.Height;
 
-            // --- THẺ 1: CHUỖI HIỆN TẠI ---
             StatCard c1 = new StatCard()
             {
                 Title = "Chuỗi hiện tại",
                 Value = $"{_user.Info.CurrentStreak} NGÀY",
                 Unit = "STREAK 🔥",
-                ColorStart = Color.FromArgb(255, 60, 0),    // Cam
+                ColorStart = Color.FromArgb(255, 60, 0),    
                 ColorEnd = Color.FromArgb(255, 100, 50),
                 Size = new Size(cardWidth, cardHeight),
                 Location = new Point(0, 0)
             };
 
-            // --- THẺ 2: CHUỖI TỐT NHẤT ---
             StatCard c2 = new StatCard()
             {
                 Title = "Chuỗi tốt nhất",
                 Value = $"{_user.Info.BestStreak} NGÀY",
                 Unit = "KỶ LỤC 🏆",
-                ColorStart = Color.FromArgb(255, 140, 0),   // Vàng
+                ColorStart = Color.FromArgb(255, 140, 0),   
                 ColorEnd = Color.FromArgb(255, 180, 0),
                 Size = new Size(cardWidth, cardHeight),
                 Location = new Point(cardWidth + gap, 0)
             };
 
-            // --- THẺ 3: TỔNG THỜI GIAN (Hiển thị Giờ:Phút:Giây) ---
-            // Chuyển đổi số giờ (double) thành TimeSpan để hiển thị chi tiết
+
             TimeSpan ts = TimeSpan.FromHours(_user.Info.TotalHours);
             string timeString = $"{(int)ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}";
 
@@ -126,7 +114,7 @@ namespace Do_an.Forms
                 Title = "Tổng thời gian",
                 Value = timeString,
                 Unit = "THỜI GIAN ⏳",
-                ColorStart = Color.FromArgb(0, 180, 80),    // Xanh lá
+                ColorStart = Color.FromArgb(0, 180, 80),    
                 ColorEnd = Color.FromArgb(50, 220, 100),
                 Size = new Size(cardWidth, cardHeight),
                 Location = new Point((cardWidth + gap) * 2, 0)
@@ -135,7 +123,6 @@ namespace Do_an.Forms
             pnlStats.Controls.AddRange(new Control[] { c1, c2, c3 });
         }
 
-        // --- CÁC HÀM UI KHÁC GIỮ NGUYÊN ---
         private void ApplyCustomLayout()
         {
             foreach (Control c in this.Controls)
@@ -237,7 +224,7 @@ namespace Do_an.Forms
 
                     MessageBox.Show("Cập nhật thành công!");
                     ToggleEditMode(false);
-                    // Load lại để chắc chắn hiển thị đúng cái vừa lưu
+                  
                     _ = RefreshDataFromServer();
                 }
                 catch (Exception ex)

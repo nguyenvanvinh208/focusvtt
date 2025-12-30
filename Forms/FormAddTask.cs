@@ -18,7 +18,7 @@ namespace Do_an.Forms
         private DateTime _tempEndTime;
         private List<TaskInfo> _existingTasks;
 
-        // Control nhập liệu (Chỉ còn Giờ và Phút)
+
         private TextBox txtStartHour, txtStartMin;
         private TextBox txtEndHour, txtEndMin;
 
@@ -52,21 +52,16 @@ namespace Do_an.Forms
             DisplayTimeOnInputs();
         }
 
-        // --- HÀM TẠO GIAO DIỆN 24H (CĂN GIỮA) ---
         private void SetupDirectInput(Panel parent, bool isStart)
         {
             Font fontNum = new Font("Segoe UI", 18F, FontStyle.Bold);
 
-            // 1. TextBox Giờ (0-23)
-            // [FIX]: X=40 (Căn lề trái để vào giữa khung)
             TextBox txtHour = CreateTimeTextBox(40, 28, fontNum);
             txtHour.TextChanged += (s, e) => ValidateNumberInput(txtHour, 0, 23);
             txtHour.KeyDown += (s, e) => HandleTextBoxKeyDown(txtHour, e, 0, 23);
             txtHour.Leave += (s, e) => ValidateAndFormat(txtHour, 0, 23);
             parent.Controls.Add(txtHour);
 
-            // 2. Dấu hai chấm (:)
-            // [FIX]: X=105
             Label lblSep = new Label();
             lblSep.Text = ":";
             lblSep.ForeColor = Color.White;

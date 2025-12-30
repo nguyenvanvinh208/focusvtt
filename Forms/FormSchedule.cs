@@ -10,7 +10,6 @@ namespace Do_an.Forms
         private System.Windows.Forms.Timer _updateTimer;
         private DateTime _currentWeekMonday;
 
-        // Khai báo Service Firebase
         private FirebaseDatabaseService _dbService;
 
         public event Action OnMenuClicked;
@@ -20,10 +19,10 @@ namespace Do_an.Forms
             InitializeComponent();
             _currentUser = user;
 
-            // Khởi tạo Service
+
             _dbService = new FirebaseDatabaseService();
 
-            // Setup Giao diện
+
             this.BackgroundImageLayout = ImageLayout.Stretch;
             this.BackColor = Color.FromArgb(15, 10, 30);
             try { this.BackgroundImage = ByteToImg(Properties.Resources.universe); } catch { }
@@ -31,20 +30,18 @@ namespace Do_an.Forms
             CalculateCurrentWeek();
             SetupCustomGridLogic();
 
-            // Timer cập nhật màu sắc thẻ
+
             _updateTimer = new System.Windows.Forms.Timer();
             _updateTimer.Interval = 30000;
             _updateTimer.Tick += (s, e) => RefreshTaskStatus();
             _updateTimer.Start();
 
-            // Tự động tải dữ liệu
             _ = LoadWeeklyScheduleAsync();
         }
 
-        // --- HÀM TẢI DỮ LIỆU TỪ SERVER ---
+
         private async Task LoadWeeklyScheduleAsync()
         {
-            // 1. Xóa sạch các thẻ cũ
             foreach (var panel in _dayPanels)
             {
                 for (int i = panel.Controls.Count - 1; i >= 0; i--)
@@ -67,7 +64,7 @@ namespace Do_an.Forms
                 {
                     foreach (var task in tasks)
                     {
-                        // Hiển thị lên giao diện
+                     
                         AddTaskCard(i, task.Id, task.Name, task.Start, task.End, task.IsDone);
                     }
                 }
@@ -154,7 +151,6 @@ namespace Do_an.Forms
                 MessageBox.Show("Đã hoàn thành công việc này!");
         }
 
-        // --- HELPER ---
 
         private void CalculateCurrentWeek()
         {
@@ -266,11 +262,8 @@ namespace Do_an.Forms
         }
     }
 
-    // --- CLASS THẺ TASK ĐÃ ĐỔI TÊN ---
-    // Đổi tên thành CardStatus để không trùng với System.Threading.Tasks.TaskStatus
     public enum CardStatus { Future, Running, Missed, Done }
 
-    // Đổi tên thành ScheduleCard để không trùng với NeonTaskCard cũ
     public class ScheduleCard : System.Windows.Forms.Control
     {
         public string TaskId;

@@ -26,7 +26,6 @@ namespace Do_an.Forms
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            // 1. Vẽ nền Gradient bo tròn
             Rectangle rect = new Rectangle(0, 0, Width, Height);
             using (GraphicsPath path = GetRoundedPath(rect, 20))
             using (LinearGradientBrush brush = new LinearGradientBrush(rect, ColorStart, ColorEnd, 45f))
@@ -34,23 +33,20 @@ namespace Do_an.Forms
                 g.FillPath(brush, path);
             }
 
-            // 2. Vẽ Title (Tiêu đề nhỏ ở trên)
             using (Font fTitle = new Font("Segoe UI", 9, FontStyle.Bold))
             {
                 g.DrawString(Title, fTitle, Brushes.WhiteSmoke, new Point(15, 15));
             }
 
-            // 3. Vẽ Value (Số liệu lớn ở giữa)
+
             using (Font fValue = new Font("Segoe UI", 22, FontStyle.Bold))
             {
                 g.DrawString(Value, fValue, Brushes.White, new Point(10, 35));
             }
 
-            // 4. Vẽ Unit (Đơn vị + Icon ở dưới) - [SỬA LỖI Ô VUÔNG TẠI ĐÂY]
             if (!string.IsNullOrEmpty(Unit))
             {
-                // Sử dụng Font "Segoe UI Emoji" để hỗ trợ hiển thị icon màu
-                // Sử dụng TextRenderer.DrawText thay vì g.DrawString để render icon tốt hơn trên WinForms
+
                 using (Font fUnit = new Font("Segoe UI Emoji", 10, FontStyle.Regular))
                 {
                     TextRenderer.DrawText(g, Unit, fUnit, new Point(15, 75), Color.WhiteSmoke, TextFormatFlags.NoPadding);
