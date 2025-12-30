@@ -29,6 +29,13 @@ namespace Do_an.Forms
         private Panel pnlControlBar;
         private PictureBox btnMin, btnMax, btnClose;
 
+        private readonly Color clrSidebarBg = Color.FromArgb(101, 67, 33);
+        private readonly Color clrHoverBtn = Color.FromArgb(160, 100, 40);
+        private readonly Color clrTextActive = Color.White;
+        private readonly Color clrTextInactive = Color.NavajoWhite;
+        private readonly Color clrControlIcon = Color.FromArgb(60, 40, 20);
+        private readonly Color clrBackground = Color.FromArgb(253, 248, 235);
+
         public MainDashboard(User user)
         {
             InitializeComponent();
@@ -44,6 +51,8 @@ namespace Do_an.Forms
             this.Size = new Size(1200, 800);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.DoubleBuffered = true;
+
+            this.BackColor = clrBackground;
 
             AddControlBar();
             _ = RefreshDataFromServer();
@@ -61,6 +70,10 @@ namespace Do_an.Forms
             pnlContent.MouseDown += PnlContent_MouseDown;
             pnlContent.MouseMove += PnlContent_MouseMove;
             pnlContent.MouseUp += PnlContent_MouseUp;
+
+            pnlSidebar.MouseDown += PnlContent_MouseDown;
+            pnlSidebar.MouseMove += PnlContent_MouseMove;
+            pnlSidebar.MouseUp += PnlContent_MouseUp;
         }
 
         private void LoadHome()
@@ -127,12 +140,13 @@ namespace Do_an.Forms
         private void btnChat_Click(object sender, EventArgs e) { LoadChat(); }
 
         public void OpenMenu() { pnlSidebar.BringToFront(); pnlSidebar.Visible = true; }
+        private void BtnCloseMenu_Click(object sender, EventArgs e) => pnlSidebar.Visible = false;
+
 
         private async Task RefreshDataFromServer()
         {
             try
             {
-                // 1. Cập nhật thông tin User
                 var latestUser = await _dbService.GetUserAsync(_currentUser.Uid);
                 if (latestUser != null)
                 {
@@ -150,7 +164,6 @@ namespace Do_an.Forms
                     });
                 }
 
-                // 2. Tìm IP Wifi thật (Bỏ qua máy ảo, loopback)
                 string finalIP = "";
                 foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
                 {
@@ -185,7 +198,6 @@ namespace Do_an.Forms
                 if (string.IsNullOrEmpty(finalIP))
                     finalIP = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString();
 
-                // [ĐÃ XÓA MESSAGE BOX, CHỈ CẬP NHẬT TIÊU ĐỀ ÂM THẦM]
                 this.Invoke((MethodInvoker)delegate {
                     this.Text = $"FOCUS VTT - LAN IP: {finalIP}";
                 });
@@ -198,14 +210,14 @@ namespace Do_an.Forms
             catch { }
         }
 
-        private void BtnCloseMenu_Click(object sender, EventArgs e) => pnlSidebar.Visible = false;
 
         private void AddControlBar()
         {
             pnlControlBar = new Panel() { BackColor = Color.Transparent, Size = new Size(120, 30), Anchor = AnchorStyles.Top | AnchorStyles.Right };
-            btnClose = CreateControlButton(DrawCloseIcon, BtnCloseApp_Click, Color.Red);
-            btnMax = CreateControlButton(DrawMaximizeIcon, BtnMaximizeApp_Click, Color.Teal);
-            btnMin = CreateControlButton(DrawMinimizeIcon, BtnMinimizeApp_Click, Color.Teal);
+            btnClose = CreateControlButton(DrawCloseIcon, BtnCloseApp_Click, Color.IndianRed);
+            btnMax = CreateControlButton(DrawMaximizeIcon, BtnMaximizeApp_Click, Color.BurlyWood);
+            btnMin = CreateControlButton(DrawMinimizeIcon, BtnMinimizeApp_Click, Color.BurlyWood);
+
             btnClose.Location = new Point(80, 0); btnMax.Location = new Point(40, 0); btnMin.Location = new Point(0, 0);
             pnlControlBar.Controls.AddRange(new Control[] { btnClose, btnMax, btnMin });
             this.Controls.Add(pnlControlBar); pnlControlBar.BringToFront();
@@ -215,7 +227,10 @@ namespace Do_an.Forms
         private PictureBox CreateControlButton(DrawIconDelegate drawFunc, EventHandler clickHandler, Color hoverColor)
         {
             PictureBox btn = new PictureBox() { Size = new Size(30, 30), SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.Transparent, Cursor = Cursors.Hand, Tag = drawFunc };
-            btn.Paint += (s, e) => { e.Graphics.SmoothingMode = SmoothingMode.AntiAlias; ((DrawIconDelegate)btn.Tag)(e.Graphics, e.ClipRectangle, Color.Black); };
+            btn.Paint += (s, e) => {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                ((DrawIconDelegate)btn.Tag)(e.Graphics, e.ClipRectangle, clrControlIcon);
+            };
             btn.MouseEnter += (s, e) => { btn.BackColor = hoverColor; btn.Invalidate(); };
             btn.MouseLeave += (s, e) => { btn.BackColor = Color.Transparent; btn.Invalidate(); };
             btn.Click += clickHandler; return btn;
@@ -225,10 +240,43 @@ namespace Do_an.Forms
         private void DrawMaximizeIcon(Graphics g, Rectangle r, Color c) { using (Pen p = new Pen(c, 2)) { g.DrawRectangle(p, r.X + 8, r.Y + 8, r.Width - 16, r.Height - 16); } }
         private void DrawMinimizeIcon(Graphics g, Rectangle r, Color c) { using (Pen p = new Pen(c, 2)) { g.DrawLine(p, r.X + 12, r.Bottom - 12, r.Right - 12, r.Bottom - 12); } }
 
-        private void CustomizeSidebar() { pnlSidebar.Dock = DockStyle.None; pnlSidebar.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left; pnlSidebar.BackColor = Color.FromArgb(240, 25, 25, 35); pnlSidebar.Size = new Size(280, this.ClientSize.Height - 100); pnlSidebar.Location = new Point(30, 50); SetRoundedRegion(pnlSidebar, 30); StyleButton(btnHome); StyleButton(btnSchedule); StyleButton(btnRanking); StyleButton(btnChat); }
+        private void CustomizeSidebar()
+        {
+            pnlSidebar.Dock = DockStyle.None;
+            pnlSidebar.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            pnlSidebar.BackColor = clrSidebarBg;
+            pnlSidebar.Size = new Size(280, this.ClientSize.Height - 100);
+            pnlSidebar.Location = new Point(30, 50);
+            SetRoundedRegion(pnlSidebar, 30);
+            StyleButton(btnHome);
+            StyleButton(btnSchedule);
+            StyleButton(btnRanking);
+            StyleButton(btnChat);
+        }
+
         private void SetRoundedRegion(Control c, int radius) { using (GraphicsPath p = GetRoundedPath(new Rectangle(0, 0, c.Width, c.Height), radius)) c.Region = new Region(p); }
         private GraphicsPath GetRoundedPath(Rectangle r, int d) { GraphicsPath p = new GraphicsPath(); d *= 2; p.AddArc(r.X, r.Y, d, d, 180, 90); p.AddArc(r.Right - d, r.Y, d, d, 270, 90); p.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90); p.AddArc(r.X, r.Bottom - d, d, d, 90, 90); p.CloseFigure(); return p; }
-        private void StyleButton(Button btn) { btn.FlatStyle = FlatStyle.Flat; btn.FlatAppearance.BorderSize = 0; btn.BackColor = Color.Transparent; btn.ForeColor = Color.WhiteSmoke; btn.Font = new Font("Segoe UI", 11); btn.TextAlign = ContentAlignment.MiddleLeft; btn.Padding = new Padding(20, 0, 0, 0); btn.Cursor = Cursors.Hand; btn.MouseEnter += (s, e) => { btn.BackColor = Color.FromArgb(50, 255, 255, 255); btn.ForeColor = Color.Cyan; }; btn.MouseLeave += (s, e) => { btn.BackColor = Color.Transparent; btn.ForeColor = Color.WhiteSmoke; }; }
+
+        private void StyleButton(Button btn)
+        {
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.BackColor = Color.Transparent;
+            btn.ForeColor = clrTextInactive;
+            btn.Font = new Font("Segoe UI", 11);
+            btn.TextAlign = ContentAlignment.MiddleLeft;
+            btn.Padding = new Padding(20, 0, 0, 0);
+            btn.Cursor = Cursors.Hand;
+            btn.MouseEnter += (s, e) => {
+                btn.BackColor = clrHoverBtn;
+                btn.ForeColor = clrTextActive;
+            };
+            btn.MouseLeave += (s, e) => {
+                btn.BackColor = Color.Transparent;
+                btn.ForeColor = clrTextInactive;
+            };
+        }
+
         private void SetupAvatarUI() { picAvatar.SizeMode = PictureBoxSizeMode.StretchImage; GraphicsPath gp = new GraphicsPath(); gp.AddEllipse(0, 0, picAvatar.Width, picAvatar.Height); picAvatar.Region = new Region(gp); }
 
         private void LoadUserData()
@@ -241,7 +289,9 @@ namespace Do_an.Forms
                 else LoadDefaultAvatar();
             }
         }
-        private void LoadDefaultAvatar() { try { using (MemoryStream ms = new MemoryStream(Properties.Resources.profile)) picAvatar.Image = Image.FromStream(ms); } catch { picAvatar.BackColor = Color.Gray; } }
+
+        private void LoadDefaultAvatar() { try { using (MemoryStream ms = new MemoryStream(Properties.Resources.profile)) picAvatar.Image = Image.FromStream(ms); } catch { picAvatar.BackColor = Color.Peru; } }
+
         private void StartClock() { _clockTimer = new System.Windows.Forms.Timer { Interval = 1000 }; _clockTimer.Tick += (s, e) => { this.Text = $"FOCUS VTT - LAN IP: {this.Text.Split(':')[1].Trim()}"; }; _clockTimer.Start(); }
         private void BtnCloseApp_Click(object sender, EventArgs e) => Application.Exit();
         private void BtnMaximizeApp_Click(object sender, EventArgs e) { if (WindowState == FormWindowState.Normal) WindowState = FormWindowState.Maximized; else WindowState = FormWindowState.Normal; btnMax.Invalidate(); }
@@ -296,7 +346,15 @@ namespace Do_an.Forms
         {
             ContextMenuStrip m = new ContextMenuStrip();
             m.Items.Add("Đổi Avatar", null, BtnChooseImage_Click);
-            m.Items.Add("Thông tin cá nhân", null, (s, ev) => { using (Form f = new FormProfile(_currentUser)) f.ShowDialog(); });
+
+            m.Items.Add("Thông tin cá nhân", null, (s, ev) => {
+                using (Form f = new FormProfile(_currentUser))
+                {
+                    f.ShowDialog();
+                    LoadUserData();
+                }
+            });
+
             m.Items.Add("Lịch sử điểm", null, (s, ev) => { using (Form f = new FormScoreHistory(_currentUser)) f.ShowDialog(); });
             m.Items.Add(new ToolStripSeparator());
             m.Items.Add("Đăng xuất", null, BtnLogout_Click);
@@ -306,6 +364,3 @@ namespace Do_an.Forms
         protected override void OnSizeChanged(EventArgs e) { base.OnSizeChanged(e); CustomizeSidebar(); if (pnlControlBar != null) pnlControlBar.Location = new Point(ClientSize.Width - 130, 5); }
     }
 }
-
-
-
