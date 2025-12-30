@@ -1,15 +1,14 @@
-﻿using Do_an.Firebase;
-using Do_an.Models;
-using Do_an.Services;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Dynamic;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Do_an.Firebase;
+using Do_an.Models;
+using System.Threading.Tasks;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Do_an.Services;
+using System.Net;
 
 namespace Do_an.Forms
 {

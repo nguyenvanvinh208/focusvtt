@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using Do_an.Firebase;
+using Do_an.Models; 
 
 namespace Do_an.Forms
 {
@@ -10,7 +11,6 @@ namespace Do_an.Forms
     {
         private readonly FirebaseAuthService _authService;
 
-        // KHAI BÁO VĂN BẢN HƯỚNG DẪN (Placeholder)
         private const string PH_USER = "Tên tài khoản hoặc Email";
         private const string PH_PASS = "Mật khẩu";
 
@@ -19,42 +19,39 @@ namespace Do_an.Forms
             InitializeComponent();
             _authService = new FirebaseAuthService();
 
-            // Đăng ký sự kiện Load để kiểm tra đăng nhập tự động
             this.Load += new System.EventHandler(this.Login_Load);
 
-            // --- 1. CẤU HÌNH BO TRÒN ---
             SetRoundedRegion(this, 30);
             SetRoundedRegion(pictureBox1, 30);
             SetRoundedRegion(pnlContainer, 30);
             SetRoundedRegion(btnLogin, 20);
 
-            // --- 2. CẤU HÌNH PLACEHOLDER ---
             SetupPlaceholder(txtUsername, PH_USER);
             SetupPlaceholder(txtPassword, PH_PASS, isPassword: true);
         }
 
-        // --- SỰ KIỆN LOAD FORM: KIỂM TRA TỰ ĐỘNG ĐĂNG NHẬP ---
         private void Login_Load(object sender, EventArgs e)
         {
-            // Nếu trong máy đã lưu trạng thái đăng nhập = true
             if (Properties.Settings.Default.IsLoggedIn)
             {
                 string savedUid = Properties.Settings.Default.UserUID;
+                User currentUser = new User
+                {
+                    Uid = savedUid,
+                    Username = "Welcome Back" 
+                };
 
-                // Mở thẳng form Main
-                main mainForm = new main(this);
-                mainForm.currentUserUid = savedUid;
-                mainForm.Show();
 
-                // Ẩn form Login đi (không đóng hẳn, chỉ ẩn)
-                // Để khi logout còn hiện lại được
+                MainDashboard dashboard = new MainDashboard(currentUser);
+                dashboard.Show();
+
+
                 this.WindowState = FormWindowState.Minimized;
                 this.ShowInTaskbar = false;
                 this.Hide();
             }
         }
 
-        // --- HÀM XỬ LÝ PLACEHOLDER ---
         private void SetupPlaceholder(TextBox txt, string placeholderText, bool isPassword = false)
         {
             txt.Text = placeholderText;
@@ -82,7 +79,6 @@ namespace Do_an.Forms
             };
         }
 
-        // SỰ KIỆN ĐĂNG NHẬP
         private async void btnLogin_Click_1(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
@@ -101,19 +97,27 @@ namespace Do_an.Forms
                 var auth = await _authService.LoginByUsernameAsync(username, password);
                 string uid = auth.User.Uid;
 
-                // --- LƯU TRẠNG THÁI ĐĂNG NHẬP ---
                 Properties.Settings.Default.IsLoggedIn = true;
                 Properties.Settings.Default.UserUID = uid;
                 Properties.Settings.Default.Save();
-                // -------------------------------
+     
 
                 MessageBox.Show($"Đăng nhập thành công!\nXin chào: {auth.User.Info.Email}",
                   "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+
+                User currentUser = new User
+                {
+                    Uid = uid,
+                    Username = username,
+                    Email = auth.User.Info.Email,
+                    Info = new UserProfile { Level = 1, XP = 0 }
+                };
+
+                MainDashboard dashboard = new MainDashboard(currentUser);
+                dashboard.Show();
+
                 this.Hide();
-                main mainForm = new main(this);
-                mainForm.currentUserUid = uid;
-                mainForm.Show();
             }
             catch (Exception ex)
             {
@@ -146,7 +150,6 @@ namespace Do_an.Forms
             this.Hide();
         }
 
-        // Nút X ở Login -> Thoát hẳn App
         private void lblClose_Click_1(object sender, EventArgs e)
         {
             Application.Exit();

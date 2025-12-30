@@ -13,7 +13,7 @@ namespace Do_an.Forms
     {
         private User _user;
         private FirebaseDatabaseService _dbService;
-        private System.Windows.Forms.Timer _refreshTimer; // Timer để cập nhật Realtime
+        private System.Windows.Forms.Timer _refreshTimer; 
 
         public FormScoreHistory(User user)
         {
@@ -24,22 +24,21 @@ namespace Do_an.Forms
             this.Size = new Size(900, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Load giao diện lần đầu
+          
             LoadDataToUI();
             ApplyCustomLayout();
             SetupStatsPanel();
 
-            // Gọi hàm cập nhật dữ liệu ngay khi mở form
+            
             _ = RefreshDataFromServer();
 
-            // Timer tự động cập nhật mỗi 3 giây
+           
             _refreshTimer = new System.Windows.Forms.Timer();
             _refreshTimer.Interval = 3000;
             _refreshTimer.Tick += async (s, e) => await RefreshDataFromServer();
             _refreshTimer.Start();
         }
 
-        // Hủy Timer khi đóng form
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (_refreshTimer != null)
@@ -50,15 +49,13 @@ namespace Do_an.Forms
             base.OnFormClosing(e);
         }
 
-        // Hàm lấy dữ liệu mới nhất từ Server
         private async Task RefreshDataFromServer()
         {
             try
             {
-                // Tính toán lại Rank trên Server trước khi hiển thị
                 await _dbService.CalculateAndSaveRankAsync(_user.Uid);
 
-                // Lấy thông tin mới nhất
+               
                 var latestInfo = await _dbService.GetUserProfileAsync(_user.Uid);
 
                 if (latestInfo != null)
@@ -69,8 +66,8 @@ namespace Do_an.Forms
                     {
                         this.Invoke((MethodInvoker)delegate
                         {
-                            SetupStatsPanel(); // Vẽ lại các thẻ số liệu
-                            LoadDataToUI();    // Cập nhật lại Level, XP
+                            SetupStatsPanel();
+                            LoadDataToUI();    
                         });
                     }
                 }
@@ -78,7 +75,6 @@ namespace Do_an.Forms
             catch { }
         }
 
-        // --- CẤU HÌNH CÁC THẺ THỐNG KÊ (ĐÃ SỬA LẠI ĐÚNG LOGIC VÀ VIỆT HÓA) ---
         private void SetupStatsPanel()
         {
             pnlStats.Controls.Clear();
@@ -89,37 +85,35 @@ namespace Do_an.Forms
             int cardWidth = (totalWidth - totalGap) / 3;
             int cardHeight = pnlStats.Height;
 
-            // --- THẺ 1: HẠNG TUẦN NÀY ---
+
             StatCard c1 = new StatCard()
             {
                 Title = "Hạng tuần này",
                 Value = _user.Info.WeeklyRank > 0 ? $"#{_user.Info.WeeklyRank}" : "--",
                 Unit = "HẠNG",
-                ColorStart = Color.FromArgb(255, 60, 0), // Màu Cam Đỏ
+                ColorStart = Color.FromArgb(255, 60, 0), 
                 ColorEnd = Color.FromArgb(255, 100, 50),
                 Size = new Size(cardWidth, cardHeight),
                 Location = new Point(0, 0)
             };
 
-            // --- THẺ 2: HẠNG CAO NHẤT ---
             StatCard c2 = new StatCard()
             {
                 Title = "Hạng cao nhất",
                 Value = _user.Info.HighestRank > 0 ? $"#{_user.Info.HighestRank}" : "--",
                 Unit = "CAO NHẤT",
-                ColorStart = Color.FromArgb(255, 140, 0), // Màu Vàng Cam
+                ColorStart = Color.FromArgb(255, 140, 0), 
                 ColorEnd = Color.FromArgb(255, 180, 0),
                 Size = new Size(cardWidth, cardHeight),
                 Location = new Point(cardWidth + gap, 0)
             };
 
-            // --- THẺ 3: SỐ LẦN LỌT TOP (ĐÃ SỬA LẠI ĐỂ HIỂN THỊ TOTAL TOP REACH) ---
             StatCard c3 = new StatCard()
             {
                 Title = "Lần lọt Top",
-                Value = $"{_user.Info.TotalTopReach}", // Hiển thị số lần lọt top
+                Value = $"{_user.Info.TotalTopReach}",
                 Unit = "LẦN",
-                ColorStart = Color.FromArgb(0, 180, 80), // Màu Xanh Lá
+                ColorStart = Color.FromArgb(0, 180, 80), 
                 ColorEnd = Color.FromArgb(50, 220, 100),
                 Size = new Size(cardWidth, cardHeight),
                 Location = new Point((cardWidth + gap) * 2, 0)
@@ -128,7 +122,6 @@ namespace Do_an.Forms
             pnlStats.Controls.AddRange(new Control[] { c1, c2, c3 });
         }
 
-        // --- CÁC HÀM DESIGN GIỮ NGUYÊN ---
 
         private void ApplyCustomLayout()
         {

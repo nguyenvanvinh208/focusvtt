@@ -12,7 +12,6 @@ using Do_an.Firebase;
 using Do_an.Models;
 using System.Text;
 using System.Linq;
-using System.Dynamic;
 
 namespace Do_an.Forms
 {
@@ -25,12 +24,8 @@ namespace Do_an.Forms
         private ContextMenuStrip _emojiMenu;
         private ContextMenuStrip _friendMenu;
 
-        // --- THAY ĐỔI MÀU BONG BÓNG CHAT (THEME VINTAGE) ---
-        // Tin nhắn của mình: Màu gỗ tối/da bò
         private readonly Color clrMineMsg = Color.FromArgb(101, 67, 33);
-        // Tin nhắn người khác: Màu giấy cũ/Parchment
         private readonly Color clrOtherMsg = Color.FromArgb(218, 200, 162);
-        // ---------------------------------------------------
 
         private readonly Dictionary<string, List<ChatMessage>> _conversations = new Dictionary<string, List<ChatMessage>>();
         private readonly Dictionary<string, HashSet<string>> _seenMessageIds = new Dictionary<string, HashSet<string>>();
@@ -57,7 +52,7 @@ namespace Do_an.Forms
         {
             InitializeComponent();
             Dock = DockStyle.Fill;
-            this.BackColor = Color.White; // Nền backup
+            this.BackColor = Color.White; 
             this.Load += UC_Message_Load;
 
             btnSend.Click += btnSend_Click;
@@ -66,10 +61,8 @@ namespace Do_an.Forms
             btnAttach.Click += btnAttach_Click;
             if (btnMenu != null) btnMenu.Click += (s, e) => OnMenuClicked?.Invoke();
 
-            // Giữ lại Voice Call
             if (btnVoiceCall != null) btnVoiceCall.Click += async (s, e) => await MakeCall("Voice");
 
-            // Đã xóa phần btnVideoCall.Click...
 
             btnAddFriend.Click += async (s, e) => {
                 using (var frm = new FormCustomInput("THÊM BẠN MỚI", "Nhập Email/Username..."))
@@ -121,8 +114,6 @@ namespace Do_an.Forms
         {
             if (_pollTimer != null) { _pollTimer.Stop(); _pollTimer.Dispose(); }
 
-            // [ĐÃ CHỈNH SỬA] Tăng Interval lên 3000 (3 giây)
-            // Bạn có thể sửa thành 5000 (5 giây) nếu muốn lâu hơn nữa
             _pollTimer = new System.Windows.Forms.Timer { Interval = 3000 };
 
             _pollTimer.Tick += async (s, e) => {
@@ -205,7 +196,6 @@ namespace Do_an.Forms
 
         private Panel AddChatItemToUI(string name, string status, string id, string uid, bool isGroup)
         {
-            // Panel list item - Background Transparent để ăn theo màu Bookshelf
             Panel p = new Panel { Name = id, Size = new Size(flChatList.Width - 20, 72), Margin = new Padding(10, 5, 10, 5), BackColor = Color.Transparent, Cursor = Cursors.Hand, Tag = name };
             CircularPictureBox pic = new CircularPictureBox { Size = new Size(50, 50), Location = new Point(10, 11), SizeMode = PictureBoxSizeMode.StretchImage };
             if (isGroup) { Bitmap b = new Bitmap(50, 50); using (Graphics g = Graphics.FromImage(b)) { g.Clear(Color.SaddleBrown); g.DrawString("G", new Font("Arial", 20, FontStyle.Bold), Brushes.White, 10, 10); } pic.Image = b; }
@@ -215,11 +205,9 @@ namespace Do_an.Forms
             GraphicsPath gp = new GraphicsPath(); gp.AddEllipse(0, 0, 14, 14); dot.Region = new Region(gp);
             if (!isGroup) p.Controls.Add(dot); dot.BringToFront();
 
-            // Text Color: White/Light Beige trên nền gỗ tối
             p.Controls.Add(new Label { Text = name, Font = new Font("Segoe UI", 11, FontStyle.Bold), ForeColor = Color.NavajoWhite, Location = new Point(70, 15), AutoSize = true });
             p.Controls.Add(new Label { Text = status, Font = new Font("Segoe UI", 9), ForeColor = (status == "Online" ? Color.LimeGreen : Color.Gray), Location = new Point(70, 40), AutoSize = true });
 
-            // Hover Color: Gỗ sáng hơn chút
             p.MouseEnter += (s, e) => p.BackColor = Color.FromArgb(60, 40, 30);
             p.MouseLeave += (s, e) => p.BackColor = Color.Transparent;
             p.Click += (s, e) => SwitchConversation(id, isGroup);
@@ -231,11 +219,10 @@ namespace Do_an.Forms
             _currentChatId = id;
             _isGroupChat = isGroup;
 
-            // Lấy tên hiển thị
             string displayName = _idToName.ContainsKey(id) ? _idToName[id] : id;
             lblChatName.Text = displayName;
 
-            // Xử lý Avatar
+
             if (!isGroup && _idToUid.ContainsKey(id))
             {
                 try
@@ -250,7 +237,7 @@ namespace Do_an.Forms
             }
             else
             {
-                // Avatar Nhóm (Vẽ chữ cái đầu)
+
                 Bitmap b = new Bitmap(50, 50);
                 using (Graphics g = Graphics.FromImage(b))
                 {
@@ -261,12 +248,11 @@ namespace Do_an.Forms
                 picChatAvatar.Image = b;
             }
 
-            // --- [FIX LỖI MẤT TIN NHẮN KHI CLICK LẠI] ---
+
             if (_seenMessageIds.ContainsKey(id))
             {
                 _seenMessageIds[id].Clear();
             }
-            // ---------------------------------------------
 
             flMessages.Controls.Clear();
             await LoadHistory(id, isGroup);
@@ -291,7 +277,7 @@ namespace Do_an.Forms
                 {
                     if (_seenMessageIds[_currentChatId].Contains(item.Key)) continue;
 
-                    if (!_isGroupChat && item.Val.peerUid != targetUid) continue; // Lọc tin nhắn theo UID
+                    if (!_isGroupChat && item.Val.peerUid != targetUid) continue; 
 
                     _seenMessageIds[id].Add(item.Key);
                     bool mine = isGroup ? (item.Val.peerUid == CurrentUserUid) : item.Val.isMine;
@@ -330,7 +316,7 @@ namespace Do_an.Forms
         {
             if (string.IsNullOrEmpty(txtMessage.Text) || string.IsNullOrEmpty(_currentChatId)) return;
             string txt = txtMessage.Text.Trim();
-            txtMessage.Clear(); // Chỉ xóa text, không hiện local để tránh spam
+            txtMessage.Clear(); 
 
             if (_isGroupChat) await _dbService.SendGroupMessageAsync(_currentChatId, CurrentUserUid, CurrentUserEmail, new FirebaseMessage { text = txt, timestamp = DateTime.UtcNow.ToString("o"), peerUid = CurrentUserUid, senderName = CurrentUserEmail });
             else if (_idToUid.TryGetValue(_currentChatId, out string uid)) await SendPrivateMessage(CurrentUserUid, uid, txt, null, null, 0);
@@ -405,13 +391,11 @@ namespace Do_an.Forms
         private void AddMessageBubble(string txt, bool m, bool s, string u)
         {
             int maxW = (int)(flMessages.ClientSize.Width * 0.65);
-            // Tin của mình: Chữ trắng (trên nền gỗ tối). Tin người khác: Chữ nâu đen (trên nền giấy cũ)
             Color txtColor = m ? Color.White : Color.FromArgb(40, 20, 10);
 
             Label l = new Label { Text = txt, Font = new Font("Segoe UI", 11), AutoSize = true, MaximumSize = new Size(maxW, 0), BackColor = Color.Transparent, ForeColor = txtColor };
             Panel b = new Panel { AutoSize = true, Padding = new Padding(12, 10, 12, 10) };
 
-            // Dùng màu Vintage định nghĩa ở trên
             Color c = m ? clrMineMsg : clrOtherMsg;
 
             b.Paint += (o, e) => { e.Graphics.SmoothingMode = SmoothingMode.AntiAlias; using (var p = GetBubblePath(new Rectangle(0, 0, b.Width - 1, b.Height - 1), 15, m)) using (var br = new SolidBrush(c)) e.Graphics.FillPath(br, p); };
@@ -419,10 +403,8 @@ namespace Do_an.Forms
         }
         private void AddImageBubbleFromBase64(string str, bool m, bool s, string u) { try { using (var ms = new MemoryStream(Convert.FromBase64String(str))) { var img = Image.FromStream(ms); var p = new PictureBox { Image = (Image)img.Clone(), SizeMode = PictureBoxSizeMode.Zoom, Size = new Size(200, 200) }; var b = new Panel { AutoSize = true }; b.Controls.Add(p); AddRow(b, m, u); } } catch { } }
 
-        // [FIX LỖI BẤM TẢI FILE]
         private void AddFileBubble(string n, long sz, bool m, bool s, string f, string u)
         {
-            // Bubble file cũng theo tông màu Vintage
             var b = new Panel { Size = new Size(200, 60), BackColor = m ? Color.SaddleBrown : Color.Tan, Tag = new FileBubbleTag { FileName = n, FileBase64 = f } };
 
             Label l1 = new Label { Text = n, ForeColor = Color.White, Font = new Font("Segoe UI", 9, FontStyle.Bold), Location = new Point(10, 10), AutoSize = true };
@@ -431,7 +413,6 @@ namespace Do_an.Forms
             b.Controls.Add(l1);
             b.Controls.Add(l2);
 
-            // Gán sự kiện click cho cả Panel và Labels để bấm đâu cũng ăn
             EventHandler clickHandler = (o, e) => DownloadFile((FileBubbleTag)b.Tag);
             b.Click += clickHandler;
             l1.Click += clickHandler;

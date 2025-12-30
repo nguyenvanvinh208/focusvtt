@@ -4,10 +4,10 @@ using Firebase.Auth.Repository;
 using Firebase.Database;
 using Firebase.Database.Query;
 using System;
-using System.Net.Http; // Cần cho HttpClient
-using System.Text;     // Cần cho Encoding
+using System.Net.Http; 
+using System.Text;     
 using System.Threading.Tasks;
-using Newtonsoft.Json; // Thư viện JSON (thường đi kèm khi cài Firebase)
+using Newtonsoft.Json; 
 using Do_an.Models;
 
 namespace Do_an.Firebase
@@ -35,20 +35,15 @@ namespace Do_an.Firebase
             _dbClient = new FirebaseClient(FirebaseConfig.DatabaseUrl);
         }
 
-        // =====================
-        // QUÊN MẬT KHẨU (Reset Password) - ĐÃ SỬA BẰNG API TRỰC TIẾP
-        // =====================
+
         public async Task ResetPasswordAsync(string email)
         {
             try
             {
-                // Sử dụng REST API của Firebase Auth để gửi yêu cầu reset
-                // URL chuẩn của Google Identity Toolkit
                 string requestUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FirebaseConfig.ApiKey}";
 
                 using (var client = new HttpClient())
                 {
-                    // Tạo nội dung yêu cầu (JSON)
                     var payload = new
                     {
                         requestType = "PASSWORD_RESET",
@@ -58,12 +53,10 @@ namespace Do_an.Firebase
                     string jsonPayload = JsonConvert.SerializeObject(payload);
                     var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                    // Gửi yêu cầu POST
                     var response = await client.PostAsync(requestUrl, content);
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        // Đọc lỗi từ Google trả về
                         string errorContent = await response.Content.ReadAsStringAsync();
 
                         if (errorContent.Contains("EMAIL_NOT_FOUND"))
@@ -81,9 +74,6 @@ namespace Do_an.Firebase
             }
         }
 
-        // =====================
-        // ĐĂNG KÝ (GIỮ NGUYÊN)
-        // =====================
         public async Task<UserCredential> RegisterAsync(string username, string email, string password)
         {
             try
@@ -118,9 +108,6 @@ namespace Do_an.Firebase
             }
         }
 
-        // =====================
-        // LOGIN & LOGOUT (GIỮ NGUYÊN)
-        // =====================
         private async Task<string> GetEmailByUsernameAsync(string username)
         {
             var users = await _dbClient.Child("Users").OnceAsync<Models.User>();

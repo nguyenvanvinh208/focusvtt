@@ -26,7 +26,6 @@ namespace Do_an.Forms
             InitializeComponent();
             this.loginForm = loginForm;
             _authService = new FirebaseAuthService();
-            // Lưu ý: Không gán sự kiện FormClosing nữa để tránh xung đột khi Exit()
             InitializeCustomLogic();
         }
 
@@ -96,7 +95,6 @@ namespace Do_an.Forms
                 await _authService.RegisterAsync(username, email, password);
                 MessageBox.Show("Đăng ký thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Đăng ký xong thì quay về Login
                 this.Close();
                 if (loginForm != null) loginForm.Show();
             }
@@ -113,17 +111,15 @@ namespace Do_an.Forms
             if (txtConfirmPassword.Text != PH_CONFIRM) txtConfirmPassword.UseSystemPasswordChar = !isChecked;
         }
 
-        // Quay lại Login (Không thoát app)
         private void llbLogin_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             this.Close();
             if (loginForm != null) loginForm.Show();
         }
 
-        // --- SỬA LOGIC THOÁT TẠI ĐÂY ---
         private void lblClose_Click(object sender, EventArgs e)
         {
-            Application.Exit(); // Thoát toàn bộ chương trình
+            Application.Exit(); 
         }
 
         private void lblTitle_Click(object sender, EventArgs e) { }
